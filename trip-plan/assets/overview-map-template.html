@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{trip_title} · OSRM 实际路径综合地图</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+*{box-sizing:border-box;}body{margin:0;font-family:-apple-system,"PingFang SC",sans-serif;}
+header{background:linear-gradient(135deg,#FF6F00,#FF8F00);color:white;padding:12px 18px;}
+header h1{font-size:17px;margin:0 0 3px;}header p{font-size:11px;opacity:.95;margin:0;}
+#map{height:calc(100vh - 130px);width:100%;}
+
+.legend{background:white;padding:10px 14px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:12px;line-height:1.9;max-width:240px;}
+.legend b{color:#FF6F00;}
+.legend span.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+
+.controls{background:white;padding:8px;margin:8px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.controls span.lbl{font-size:12px;color:#666;font-weight:500;margin-right:4px;}
+.day-filter button,.route-toggle button{padding:5px 11px;border:1px solid #ddd;background:white;border-radius:14px;cursor:pointer;font-size:12px;}
+.day-filter button.active,.route-toggle button.active{background:#FF6F00;color:white;border-color:#FF6F00;}
+
+.leaflet-popup-content{font-size:13px;min-width:220px;line-height:1.6;}
+.leaflet-popup-content b{color:#FF6F00;font-size:14px;}
+.src-original{color:#2E7D32;font-weight:600;}
+.src-known{color:#1565C0;}
+.src-fallback{color:#C62828;font-style:italic;opacity:0.7;}
+</style>
+</head>
+<body>
+
+<!--
+================================================================
+📚 OSRM 实际路径综合地图模板
+
+必含元素:
+  1. 顶部 header(标题 + 简介)
+  2. controls(Day 过滤 + 路径模式切换:导航/直线)
+  3. 地图 div(全屏高度)
+  4. 内嵌数据:pois / day_routes / day_colors / tag_colors
+  5. 渲染逻辑:
+     - marker:divIcon,带 idx 数字,tag 颜色
+     - 路径:L.polyline 用 OSRM geometry(实线)或直线(虚线)
+     - 99号公路等特殊路线:用预设 waypoint 数组画
+  6. 切换:
+     - 顶部 Day 按钮 → 仅显示该 Day
+     - 顶部"导航/直线"按钮 → 切换路径模式
+
+数据替换占位符:
+  __POIS__         → 完整 POI 列表(从 pois.json 拷贝)
+  __DAY_ROUTES__   → {D1: [[lng,lat],...], D2: [...], ...}(WGS-84,每段 1k-12k 点)
+  __SPECIAL_ROUTES__ → 特殊路线 waypoint 数组(99号公路等)
+  __DAYS__         → {D1: "标题", D2: "标题", ...}
+  __DAY_COLORS__   → {D1: "#E53935", D2: "#1E88E5", ...}
+  __TAG_COLORS__   → {start: "#00C853", attract: "#FF6F00", ...}
+  __TAG_LABELS__   → {start: "起点", attract: "景点", ...}
+
+调用方式:用 sed 或 Python 把 __XXX__ 占位符替换成 JSON 字面量
+================================================================
+-->
+
+<header>
+  <h1>🚗 {trip_title} · OSRM 实际路径综合地图</h1>
+  <p>{trip_summary} · 可切换 Day / 直线 ↔ 导航路线</p>
+</header>
+
+<div class="controls">
+  <div class="day-filter" id="dayFilter">
+    <span class="lbl">📅 Day:</span>
+    <button class="active" data-day="all">全部</button>
+    <button data-day="D1">D1</button>
+    <button data-day="D2">D2</button>
+    <button data-day="D3">D3</button>
+    <!-- 按需加 D4 / D5 -->
+  </div>
+  <div class="route-toggle" id="routeToggle">
+    <span class="lbl">🛣 路径:</span>
+    <button class="active" data-mode="route">导航路线 (OSRM)</button>
+    <button data-mode="straight">直线</button>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// ==================== 数据(从 pois.json 注入) ====================
+const pois = __POIS__;
+const dayRoutes = __DAY_ROUTES__;
+const specialRoutes = __SPECIAL_ROUTES__;
+const days = __DAYS__;
+const dayColors = __DAY_COLORS__;
+const tagColors = __TAG_COLORS__;
+const tagLabels = __TAG_LABELS__;
+
+// ==================== 地图初始化 ====================
+const map = L.map('map', {zoomControl: true}).setView([{init_lat}, {init_lng}], {init_zoom});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+const markerLayer = L.layerGroup().addTo(map);
+const lineLayer = L.layerGroup().addTo(map);
+const routeLayer = L.layerGroup().addTo(map);
+const specialLayer = L.layerGroup().addTo(map);
+
+let currentDay = 'all';
+let currentMode = 'route';
+
+function render() {
+  markerLayer.clearLayers();
+  lineLayer.clearLayers();
+  routeLayer.clearLayers();
+  specialLayer.clearLayers();
+
+  const daysToShow = currentDay === 'all' ? Object.keys(days) : [currentDay];
+  const allBounds = [];
+
+  daysToShow.forEach(function(day) {
+    const dayPois = pois.filter(function(p) { return p.day === day; });
+
+    // 路径选择
+    let pathLatLngs = null;
+    if (currentMode === 'route' && dayRoutes[day] && dayRoutes[day].length >= 2) {
+      pathLatLngs = dayRoutes[day].map(function(c) { return [c[1], c[0]]; });
+    } else if (dayPois.length >= 2) {
+      pathLatLngs = dayPois.map(function(p) { return [p.lat_wgs84, p.lng_wgs84]; });
+    }
+
+    if (pathLatLngs) {
+      const layer = currentMode === 'route' ? routeLayer : lineLayer;
+      L.polyline(pathLatLngs, {
+        color: dayColors[day],
+        weight: currentMode === 'route' ? 5 : 3,
+        opacity: currentMode === 'route' ? 0.85 : 0.6,
+        dashArray: currentMode === 'route' ? null : '6,6'
+      }).addTo(layer);
+    }
+
+    // Markers
+    dayPois.forEach(function(p) {
+      const color = tagColors[p.tag] || '#666';
+      const isFallback = p.coord_source && p.coord_source.indexOf('fallback') === 0;
+      const icon = L.divIcon({
+        className: '',
+        html: '<div style="background:' + color + ';color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,.3)' + (isFallback ? ';opacity:0.5' : '') + '">' + p.idx + '</div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+      const marker = L.marker([p.lat_wgs84, p.lng_wgs84], {icon: icon, title: p.name}).addTo(markerLayer);
+
+      // Popup 含高德导航
+      const amapUrl = 'https://uri.amap.com/navigation?to=' + p.lng_gcj02 + ',' + p.lat_gcj02 + ',' + encodeURIComponent(p.name) + '&mode=car&src={src}';
+      const srcClass = p.coord_source ? p.coord_source.split(':')[0] : 'unknown';
+      const popupHtml =
+        '<b>' + p.idx + '. ' + p.name + '</b><br>' +
+        '<span style="color:' + color + '">●</span> ' + tagLabels[p.tag] + ' · ' + p.day + '<br>' +
+        '<small>' + p.info + '</small><br>' +
+        '<small style="color:#888">📍 GCJ-02: ' + p.lng_gcj02 + ', ' + p.lat_gcj02 + '</small><br>' +
+        '<small class="src-' + srcClass + '">来源: ' + (p.coord_source || '未知') + '</small><br>' +
+        '<a href="' + amapUrl + '" target="_blank" style="color:#FF6F00">🧭 高德导航</a>';
+      marker.bindPopup(popupHtml);
+      allBounds.push([p.lat_wgs84, p.lng_wgs84]);
+    });
+  });
+
+  // 特殊路线(如 99号公路)
+  if (currentDay === 'all' || currentDay === 'D{special_day}') {
+    specialRoutes.forEach(function(route) {
+      if (!route.waypoints || route.waypoints.length < 2) return;
+      const latlngs = route.waypoints.map(function(c) { return [c[1], c[0]]; });
+      L.polyline(latlngs, {
+        color: route.color || '#FF6F00',
+        weight: route.weight || 6,
+        opacity: 0.9
+      }).addTo(specialLayer).bindPopup(route.label || '特殊路线');
+    });
+  }
+
+  if (allBounds.length > 0) map.fitBounds(allBounds, {padding: [50, 50]});
+}
+
+render();
+
+// ==================== 图例 ====================
+const legend = L.control({position: 'bottomright'});
+legend.onAdd = function() {
+  const div = L.DomUtil.create('div', 'legend');
+  let html = '<b>类别</b><br>';
+  Object.keys(tagLabels).forEach(function(k) {
+    html += '<span class="dot" style="background:' + tagColors[k] + '"></span>' + tagLabels[k] + '<br>';
+  });
+  html += '<br><b>Day 路线</b><br>';
+  Object.keys(days).forEach(function(k) {
+    html += '<span class="dot" style="background:' + dayColors[k] + '"></span>' + k + ': ' + days[k] + '<br>';
+  });
+  if (specialRoutes.length > 0) {
+    html += '<br><b>特殊路线</b><br>';
+    specialRoutes.forEach(function(r) {
+      html += '<span class="dot" style="background:' + (r.color || '#FF6F00') + '"></span>' + (r.label || '?') + '<br>';
+    });
+  }
+  html += '<br><span class="dot" style="background:#999;opacity:0.5"></span>半透明 = city 兜底';
+  div.innerHTML = html;
+  return div;
+};
+legend.addTo(map);
+
+// ==================== 控件交互 ====================
+document.querySelectorAll('#dayFilter button').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#dayFilter button').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentDay = btn.dataset.day;
+    render();
+  });
+});
+document.querySelectorAll('#routeToggle button').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#routeToggle button').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    render();
+  });
+});
+</script>
+</body>
+</html>

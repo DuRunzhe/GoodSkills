@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🚗 示例行程 · 高德导航点位</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f5f6f8;
+  padding-bottom: 60px;
+  -webkit-font-smoothing: antialiased;
+}
+header {
+  background: linear-gradient(135deg, #FF6F00 0%, #FF8F00 100%);
+  color: white;
+  padding: 20px 18px 18px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+header h1 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+header p { font-size: 12px; opacity: 0.95; }
+header .route { font-weight: 600; }
+.day-nav {
+  background: white;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  position: sticky;
+  top: 76px;
+  z-index: 99;
+  border-bottom: 1px solid #e8eaec;
+  -webkit-overflow-scrolling: touch;
+}
+.day-nav::-webkit-scrollbar { display: none; }
+.day-nav a {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-right: 6px;
+  background: #f0f1f3;
+  color: #555;
+  border-radius: 14px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+.day-nav a.active, .day-nav a:active { background: #FF6F00; color: white; }
+.day { padding: 16px 14px; }
+.day-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(to right, #fff5e6, white);
+  border-left: 5px solid #FF6F00;
+  border-radius: 4px;
+}
+.day-title .day-num { font-size: 20px; font-weight: 700; color: #FF6F00; margin-right: 10px; }
+.day-title .day-info { flex: 1; }
+.day-title h2 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
+.day-title .meta { font-size: 11px; color: #888; }
+.group { margin-bottom: 18px; }
+.group-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FF6F00;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #FF6F00;
+}
+.group-title .emoji { margin-right: 4px; }
+.poi {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ecedef;
+}
+.poi-name { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+.poi-info { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.5; }
+.tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-weight: 500;
+  color: white;
+  vertical-align: middle;
+}
+.tag.start   { background: #00C853; }
+.tag.end     { background: #D50000; }
+.tag.attract { background: #FF6F00; }
+.tag.hotel   { background: #7B1FA2; }
+.tag.food    { background: #FFB300; color: #1a1a1a; }
+.tag.service { background: #1976D2; }
+.tag.stop    { background: #00838F; }
+.poi-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.poi-actions a {
+  flex: 1; min-width: 90px;
+  text-align: center; padding: 7px 6px;
+  font-size: 12px; border-radius: 6px;
+  text-decoration: none; font-weight: 500;
+  background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2;
+}
+.poi-actions a:active { background: #FFE0B2; }
+.btn-search { background: #E3F2FD !important; color: #1565C0 !important; border-color: #BBDEFB !important; }
+.btn-marker { background: #F3E5F5 !important; color: #6A1B9A !important; border-color: #E1BEE7 !important; }
+.usage {
+  background: white; border-radius: 10px;
+  padding: 14px 16px; margin: 20px 14px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  font-size: 12px; color: #888; line-height: 1.7;
+}
+.usage b { color: #FF6F00; }
+.to-top {
+  position: fixed; bottom: 20px; right: 20px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #FF6F00; color: white; border: none;
+  font-size: 18px; font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer; z-index: 50; display: none;
+}
+.to-top.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ⚠️ 本文件是脱敏示例,所有 POI 名 / 坐标都是占位符 -->
+
+<header>
+  <h1>🚗 示例行程 · 高德导航点位</h1>
+  <p><span class="route">起点 → 景点 A → 景点 B → 终点</span></p>
+  <p style="margin-top:4px;">3 天 · 点击任意点位 → 高德 App 自动导航</p>
+</header>
+
+<nav class="day-nav" id="dayNav">
+  <a href="#day1">D1 示例起点 → A</a>
+  <a href="#day2">D2 A → B</a>
+  <a href="#day3">D3 B → 终点</a>
+</nav>
+
+<!-- ================== Day 1 ================== -->
+<section class="day" id="day1">
+  <div class="day-title">
+    <span class="day-num">D1</span>
+    <div class="day-info">
+      <h2>示例日期 · 起点 → 景点 A</h2>
+      <div class="meta">100km · 2h · 示例主题</div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title"><span class="emoji">🌅</span>上午段(8-12 点)</div>
+
+    <div class="poi">
+      <div class="poi-name">起点<span class="tag start">起点</span></div>
+      <div class="poi-info">📍 早上 8:00 出发</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.000000,40.000000,起点&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-marker" target="_blank"
+           href="https://uri.amap.com/marker?markers=116.000000,40.000000,起点&src=yourtag">📍 标记位置</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=起点&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+
+    <div class="poi">
+      <div class="poi-name">服务区 A<span class="tag service">服务区</span></div>
+      <div class="poi-info">📍 10:00 第一次休整</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.200000,40.200000,服务区%20A&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=服务区%20A&city=示例城市&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+
+    <div class="poi">
+      <div class="poi-name">景点 A<span class="tag attract">景点</span></div>
+      <div class="poi-info">📍 12:30 抵达 · 游玩 2h</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.500000,40.500000,景点%20A&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-marker" target="_blank"
+           href="https://uri.amap.com/marker?markers=116.500000,40.500000,景点%20A&src=yourtag">📍 标记位置</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=景点%20A&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== Day 2 ================== -->
+<section class="day" id="day2">
+  <div class="day-title">
+    <span class="day-num">D2</span>
+    <div class="day-info">
+      <h2>示例日期 · 景点 A → 景点 B</h2>
+      <div class="meta">80km · 3h · 示例主题</div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏛</span>景点</div>
+
+    <div class="poi">
+      <div class="poi-name">景点 A<span class="tag attract">景点</span></div>
+      <div class="poi-info">📍 8:30 出发</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.500000,40.500000,景点%20A&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-marker" target="_blank"
+           href="https://uri.amap.com/marker?markers=116.500000,40.500000,景点%20A&src=yourtag">📍 标记位置</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=景点%20A&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+
+    <div class="poi">
+      <div class="poi-name">景点 B<span class="tag attract">景点</span></div>
+      <div class="poi-info">📍 11:00 抵达 · 游玩 2h</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=117.000000,41.000000,景点%20B&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-marker" target="_blank"
+           href="https://uri.amap.com/marker?markers=117.000000,41.000000,景点%20B&src=yourtag">📍 标记位置</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=景点%20B&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title"><span class="emoji">🍜</span>餐厅</div>
+
+    <div class="poi">
+      <div class="poi-name">餐厅 A<span class="tag food">餐厅</span></div>
+      <div class="poi-info">📍 13:30 午餐</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.800000,40.700000,餐厅%20A&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=餐厅%20A&city=示例城市&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏨</span>酒店</div>
+
+    <div class="poi">
+      <div class="poi-name">酒店 A<span class="tag hotel">酒店</span></div>
+      <div class="poi-info">📍 18:00 入住</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.500000,40.500000,酒店%20A&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=酒店%20A&city=示例城市&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== Day 3 ================== -->
+<section class="day" id="day3">
+  <div class="day-title">
+    <span class="day-num">D3</span>
+    <div class="day-info">
+      <h2>示例日期 · 景点 B → 终点</h2>
+      <div class="meta">150km · 4h · 示例主题</div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏛</span>景点</div>
+
+    <div class="poi">
+      <div class="poi-name">景点 C<span class="tag attract">景点</span></div>
+      <div class="poi-info">📍 9:00 出发 · 半日游</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.200000,40.300000,景点%20C&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-marker" target="_blank"
+           href="https://uri.amap.com/marker?markers=116.200000,40.300000,景点%20C&src=yourtag">📍 标记位置</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=景点%20C&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title"><span class="emoji">⛽</span>服务区</div>
+
+    <div class="poi">
+      <div class="poi-name">服务区 B<span class="tag service">服务区</span></div>
+      <div class="poi-info">📍 14:00 返程休整</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.100000,40.100000,服务区%20B&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=服务区%20B&city=示例城市&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏁</span>终点</div>
+
+    <div class="poi">
+      <div class="poi-name">终点<span class="tag end">终点</span></div>
+      <div class="poi-info">📍 17:00 抵达</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=116.000000,40.000000,终点&mode=car&src=yourtag">🚗 导航</a>
+        <a class="btn-marker" target="_blank"
+           href="https://uri.amap.com/marker?markers=116.000000,40.000000,终点&src=yourtag">📍 标记位置</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword=终点&src=yourtag">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="usage">
+  💡 <b>使用说明</b><br>
+  • 点击 <b>🚗 导航</b> → 直接唤起高德地图 App 路径规划<br>
+  • 点击 <b>📍 标记位置</b> → 在高德地图上标记该点<br>
+  • 点击 <b>🔍 搜索</b> → 在高德地图中搜索该地点<br>
+  • <b>有坐标</b>的点显示 3 个按钮,<b>无坐标</b>的点显示 2 个按钮<br>
+</div>
+
+<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('toTop').classList.toggle('show', window.scrollY > 200);
+});
+const dayLinks = document.querySelectorAll('.day-nav a');
+const daySections = document.querySelectorAll('.day');
+function updateActiveDay() {
+  let current = '';
+  daySections.forEach(s => {
+    const rect = s.getBoundingClientRect();
+    if (rect.top <= 120) current = s.id;
+  });
+  dayLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateActiveDay, {passive: true});
+</script>
+
+</body>
+</html>

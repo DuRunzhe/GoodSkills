@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🚗 {trip_title} · 高德导航点位</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f5f6f8;
+  padding-bottom: 60px;
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  background: linear-gradient(135deg, #FF6F00 0%, #FF8F00 100%);
+  color: white;
+  padding: 20px 18px 18px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+header h1 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+header p { font-size: 12px; opacity: 0.95; }
+header .route { font-weight: 600; }
+
+.day-nav {
+  background: white;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  position: sticky;
+  top: 76px;
+  z-index: 99;
+  border-bottom: 1px solid #e8eaec;
+  -webkit-overflow-scrolling: touch;
+}
+.day-nav::-webkit-scrollbar { display: none; }
+.day-nav a {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-right: 6px;
+  background: #f0f1f3;
+  color: #555;
+  border-radius: 14px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+.day-nav a.active, .day-nav a:active {
+  background: #FF6F00;
+  color: white;
+}
+
+.day { padding: 16px 14px; }
+.day-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(to right, #fff5e6, white);
+  border-left: 5px solid #FF6F00;
+  border-radius: 4px;
+}
+.day-title .day-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FF6F00;
+  margin-right: 10px;
+}
+.day-title .day-info { flex: 1; }
+.day-title h2 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
+.day-title .meta { font-size: 11px; color: #888; }
+
+.group { margin-bottom: 18px; }
+.group-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FF6F00;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #FF6F00;
+}
+.group-title .emoji { margin-right: 4px; }
+
+.poi {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ecedef;
+}
+.poi-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+.poi-info {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-weight: 500;
+  color: white;
+  vertical-align: middle;
+}
+.tag.start   { background: #00C853; }
+.tag.end     { background: #D50000; }
+.tag.attract { background: #FF6F00; }
+.tag.hotel   { background: #7B1FA2; }
+.tag.food    { background: #FFB300; color: #1a1a1a; }
+.tag.service { background: #1976D2; }
+.tag.stop    { background: #00838F; }
+
+.poi-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.poi-actions a {
+  flex: 1;
+  min-width: 90px;
+  text-align: center;
+  padding: 7px 6px;
+  font-size: 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  background: #FFF3E0;
+  color: #E65100;
+  border: 1px solid #FFE0B2;
+}
+.poi-actions a:active { background: #FFE0B2; }
+.btn-search { background: #E3F2FD !important; color: #1565C0 !important; border-color: #BBDEFB !important; }
+.btn-marker { background: #F3E5F5 !important; color: #6A1B9A !important; border-color: #E1BEE7 !important; }
+
+.usage {
+  background: white;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 20px 14px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  font-size: 12px;
+  color: #888;
+  line-height: 1.7;
+}
+.usage b { color: #FF6F00; }
+.usage .tip { color: #555; margin-top: 6px; }
+
+.to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FF6F00;
+  color: white;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 50;
+  display: none;
+}
+.to-top.show { display: block; }
+</style>
+</head>
+<body>
+
+<!--
+================================================================
+📚 导航点位网页模板
+
+按坐标可用性分 2 种 POI 卡片:
+- 有坐标的 POI → [🚗 导航] [📍 标记位置] [🔍 搜索]    (3 按钮)
+- 无坐标的 POI → [🚗 导航(0,0 占位)] [🔍 搜索(带 city)]    (2 按钮)
+
+设计原则:
+- 0,0 替代:导航走 navigation?to=0,0,name,高德 dir 页自动 fallback 到 name 搜索定位
+- 搜索永在:兜底永久·有坐标点用于查同名/收藏/确认·无坐标点带 city 限定防误选
+- 📍 标记位置只在有真实坐标时出现
+
+必含元素(按从上到下顺序):
+  1. 顶部 header(标题 + 路线 + 提示语)
+  2. day-nav(sticky,Day 锚点跳转)
+  3. Day × N section(每个 Day 包含:day-title / 多个 group)
+  4. group(时段分组:上午/下午/晚上 / 类别分组:景点/餐厅/酒店)
+  5. poi 卡片(name + tag + info + action 按钮)
+  6. usage 区块(使用说明 + tip)
+  7. to-top 按钮(fixed 右下角)
+================================================================
+-->
+
+<!-- ========== 顶部 ========== -->
+<header>
+  <h1>🚗 {trip_title} · 高德导航点位</h1>
+  <p><span class="route">{route_summary}</span></p>
+  <p style="margin-top:4px;">{day_count} 天 · 点击任意点位 → 高德 App 自动导航</p>
+</header>
+
+<!-- ========== 日期快速跳转 ========== -->
+<nav class="day-nav" id="dayNav">
+  <a href="#day1">D1 {day1_short_title}</a>
+  <a href="#day2">D2 {day2_short_title}</a>
+  <a href="#day3">D3 {day3_short_title}</a>
+  <!-- 按需添加更多 Day -->
+</nav>
+
+<!-- ========== Day 1 ========== -->
+<section class="day" id="day1">
+  <div class="day-title">
+    <span class="day-num">D1</span>
+    <div class="day-info">
+      <h2>{date1} · {day1_long_title}</h2>
+      <div class="meta">{day1_mileage}km · {day1_duration} · {day1_theme}</div>
+    </div>
+  </div>
+
+  <!-- 时段分组示例 -->
+  <div class="group">
+    <div class="group-title"><span class="emoji">🌅</span>上午段(7-12 点)· 出发 + 中途休整 + 午餐</div>
+
+    <!-- POI 卡片:有坐标(3 按钮) -->
+    <div class="poi">
+      <div class="poi-name">{poi_name}<span class="tag {tag}">{tag_label}</span></div>
+      <div class="poi-info">📍 {time} · {poi_note}</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to={lng},{lat},{poi_name}&mode=car&src={src}">🚗 导航</a>
+        <a class="btn-marker" target="_blank"
+           href="https://uri.amap.com/marker?markers={lng},{lat},{poi_name}&src={src}">📍 标记位置</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword={poi_name}&src={src}">🔍 搜索</a>
+      </div>
+    </div>
+
+    <!-- POI 卡片:无坐标(2 按钮,0,0 + city) -->
+    <div class="poi">
+      <div class="poi-name">{poi_name_no_coord}<span class="tag service">服务区</span></div>
+      <div class="poi-info">📍 {time} · {poi_note}</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to=0,0,{poi_name_no_coord}&mode=car&src={src}">🚗 导航</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword={poi_name_no_coord}&city={city_name}&src={src}">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 类别分组示例 -->
+  <div class="group">
+    <div class="group-title"><span class="emoji">🍜</span>餐厅</div>
+
+    <div class="poi">
+      <div class="poi-name">{restaurant_name}<span class="tag food">餐厅</span></div>
+      <div class="poi-info">📍 {time} 午餐 · {cuisine} · {price_range}</div>
+      <div class="poi-actions">
+        <a class="btn-nav" target="_blank"
+           href="https://uri.amap.com/navigation?to={lng},{lat},{restaurant_name}&mode=car&src={src}">🚗 导航</a>
+        <a class="btn-search" target="_blank"
+           href="https://uri.amap.com/search?keyword={restaurant_name}&city={city_name}&src={src}">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 按需重复 Day 2 / Day 3 / ... -->
+
+<!-- ========== 使用说明 ========== -->
+<div class="usage">
+  💡 <b>使用说明</b><br>
+  • 点击 <b>🚗 导航</b> → 直接唤起高德地图 App 路径规划<br>
+  • 点击 <b>📍 标记位置</b> → 在高德地图上标记该点(用于收藏 / 截图分享)<br>
+  • 点击 <b>🔍 搜索</b> → 在高德地图中搜索该地点(用于查同名 / 备选)<br>
+  • <b>有坐标</b>的点显示 3 个按钮,<b>无坐标</b>的点显示 2 个按钮(0,0 替代 + 带 city 搜索兜底)<br>
+  <br>
+  <span class="tip">⚠️ 0,0 占位:未获取精确坐标但有准确地名时使用,高德会自动 fallback 到 name 搜索定位。</span>
+</div>
+
+<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('toTop').classList.toggle('show', window.scrollY > 200);
+});
+// day-nav 当前 active 高亮
+const dayLinks = document.querySelectorAll('.day-nav a');
+const daySections = document.querySelectorAll('.day');
+function updateActiveDay() {
+  let current = '';
+  daySections.forEach(s => {
+    const rect = s.getBoundingClientRect();
+    if (rect.top <= 120) current = s.id;
+  });
+  dayLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateActiveDay, {passive: true});
+</script>
+
+</body>
+</html>
