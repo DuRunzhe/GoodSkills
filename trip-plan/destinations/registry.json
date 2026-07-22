@@ -1,0 +1,25 @@
+{
+  "_comment": "目的地注册表。LLM 在被 trip-plan skill 唤起时,先读这个文件确认目的地存在 + maturity 等级。",
+  "_schema_ref": "./README.md",
+
+  "destinations": {
+    "wutaishan": {
+      "name": "五台山",
+      "region": "山西省忻州市",
+      "type": "古建筑 + 佛教文化",
+      "playbook": "destinations/wutaishan.md",
+      "maturity": "stable",
+      "last_verified": "2026-07-23",
+      "tags": ["古建筑", "佛教", "梁思成朝圣", "自驾"]
+    },
+    "lhasa": {
+      "name": "拉萨",
+      "region": "西藏自治区拉萨市",
+      "type": "高原 + 藏传佛教",
+      "playbook": "destinations/lhasa.md",
+      "maturity": "draft",
+      "last_verified": null,
+      "tags": ["高原", "藏传佛教", "布达拉宫", "边防证"]
+    }
+  }
+}
