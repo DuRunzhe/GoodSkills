@@ -10,21 +10,29 @@ description: 旅行游玩攻略全套产物生成。从一份行程原始数据(
 ## 快速开始
 
 ```bash
-# 1. 准备数据(从 CSV / Markdown / 高德收藏,转成 pois.json)
+# 1. 从任意输入提取 POI 数据(自动识别 HTML / MD / CSV / JSON / 自由文本)
 #    详见 references/input-format.md
-python scripts/parse_input.py trip.csv -o pois.json
-python scripts/gcj02_wgs84.py pois.json pois.json --mode to_wgs84  # 补 WGS-84
+python scripts/parse_input.py <input> -o pois.json
+#    例:
+#      python scripts/parse_input.py trip.html -o pois.json
+#      python scripts/parse_input.py trip.csv -o pois.json
+#      python scripts/parse_input.py trip.md -o pois.json
+#      python scripts/parse_input.py notes.txt -o pois.json  # 走 LLM 辅助流程
+#      python scripts/parse_input.py pois.json --validate   # 已有 JSON 时校验+透传
 
-# 2. 校验
+# 2. 补 WGS-84 坐标(GCJ-02 → WGS-84,供 OSM 瓦片 / OSRM 用)
+python scripts/gcj02_wgs84.py pois.json pois.json --mode to_wgs84
+
+# 3. 校验 schema / 必含字段 / 坐标质量
 python scripts/validate.py pois.json --strict
 
-# 3. 一键生成产物
+# 4. 一键生成 5 类产物
 python scripts/gen_trip_artifacts.py pois.json -o ./output/ --src momotrip
 
-# 4. 截图(用于分享)
+# 5. 截图(用于分享,需 playwright)
 python scripts/screenshot_html.py ./output/trip-overview-map.html --batch -o ./screenshots/
 
-# 5. 部署到 GitHub Pages
+# 6. 部署到 GitHub Pages
 #    详见 references/github-pages-deploy.md
 ```
 
@@ -36,8 +44,40 @@ python scripts/screenshot_html.py ./output/trip-overview-map.html --batch -o ./s
 - 用户提供了一组 POI + Day 划分,问"怎么整理成网页/地图/KML"
 - 用户要做"导航点位页 / 综合地图 / OSRM 路线 / 高德导入"
 - 用户要把一份 markdown 长文配套成可导航的网页
+- **用户给了任何形式的旅行内容**(文章 / HTML / Markdown / CSV / JSON / 自由文本 / 对话片段 / Notion 导出),想沉淀成完整产物
 
 **不确定要不要用?看** `references/decision-tree.md`
+
+---
+
+## 输入端(任意形式 → POI 数据)
+
+**核心约束**:输入可以是任何形式,但**输出必须归一到 `pois.json`**(标准 schema),后续流程才接得上。
+
+```
+[任意输入]  ──parse_input.py──►  [pois.json]  ──validate.py──►  [5 类产物]
+                                    │
+                                    ├─ gcj02_wgs84.py 补 WGS-84
+                                    └─ 可选:人工微调 fallback 坐标
+```
+
+**支持的输入形式**(自动识别,详见 `references/input-format.md`):
+
+| 形式 | 识别 | 适用场景 | 坐标质量 |
+|---|---|---|---|
+| HTML 导航页 | 文件含 `<div class="poi">` + 高德 href | 已有现成 trip-plan 产物想改 | original |
+| Markdown 文章 | `.md` / `.markdown` 扩展名 | 博客攻略 _posts/*.md | known / fallback |
+| CSV 表 | `.csv` 扩展名 + 表头匹配 | LLM 辅助抽取后中转 | 视上游 |
+| JSON | `.json` 扩展名 + schema 校验 | 已是标准格式 | 视上游 |
+| 自由文本 | 其他 | 一段文字描述 / 聊天 / 笔记 | fallback |
+
+**非结构化输入**(长文 / 自由文本 / 多轮对话)的处理路径:
+
+1. 先用 LLM 把文本抽取成结构化 CSV(模板见 `references/input-format.md` §6)
+2. CSV 喂给 `parse_input.py --form csv` 输出 `pois.json`
+3. 走标准流程
+
+**输入端不可处理的**:图片 / 语音 / PDF(请先 OCR 或手工转文本)
 
 ## 产物清单
 
@@ -70,12 +110,13 @@ trip-plan/
 │   ├── github-pages-deploy.md         # GitHub Pages 部署
 │   ├── input-format.md                # 输入端:数据从哪来,什么格式
 │   └── decision-tree.md               # 决策树:什么时候用哪种产物
-├── scripts/                          # 6 个可执行脚本
+├── scripts/                          # 7 个可执行脚本
+│   ├── parse_input.py                 # ★ 输入适配器:任意形式(HTML/MD/CSV/JSON/文本) → pois.json
 │   ├── gcj02_wgs84.py                 # 坐标互转(GCJ-02 ↔ WGS-84)
 │   ├── osrm_route.py                  # OSRM 公共 API 封装
 │   ├── assign_day_colors.py           # Day 颜色自动分配
 │   ├── validate.py                    # 用 schema 校验产物
-│   ├── gen_trip_artifacts.py          # 端到端产物生成器
+│   ├── gen_trip_artifacts.py          # 端到端产物生成器(吃 pois.json)
 │   └── screenshot_html.py             # Playwright HTML 截图
 └── examples/                         # 脱敏示例
     ├── README.md
@@ -90,6 +131,7 @@ trip-plan/
 
 | 脚本 | 依赖 |
 |---|---|
+| `parse_input.py` | HTML 解析:`beautifulsoup4`(可选);其他格式:仅标准库 |
 | `gcj02_wgs84.py` | 仅标准库 |
 | `assign_day_colors.py` | 仅标准库 |
 | `osrm_route.py` | `curl` |
@@ -130,6 +172,27 @@ POI 用 7 类 tag:
 | `stop` | 驿站 / 中转点 | `#00838F` 青 |
 
 详见 `references/layout-styles.md`。
+
+### 输入端处理原则
+
+`parse_input.py` 的处理优先级:
+
+1. **结构化优先**:HTML / JSON / CSV 能精确抽取就用精确结果
+2. **启发式 fallback**:Markdown / 半结构化文本用正则 + 关键词匹配
+3. **失败留痕**:解析不出来的 POI 输出 warning 到 stderr,但不阻断整体流程;坐标缺失的标 `coord_source=fallback`
+4. **LLM 辅助中转**:非结构化文本不在脚本内做 LLM 调用(成本 + 不可重复),而是通过 CSV 中转,模板见 `references/input-format.md` §6
+
+**重要**:从 HTML / Markdown 抽取的 POI 必须输出可读清单到 stdout,用户可肉眼复核后用 `--filter` 或人工编辑 `pois.json` 微调。
+
+### 标签扩展(2026-07-23 起)
+实测使用中发现部分场景的 tag 超出 7 类基础集,在现有 nav-template 颜色体系中已实装:
+
+| tag | 含义 | 颜色 |
+|---|---|---|
+| `peak` | 山顶 / 制高点 | `#f57f17` 黄 |
+| `optional` | 可选 / 收尾 | `#0891b2` 青 |
+
+新 tag 加进 `assets/pois.schema.json` 时要同步更新 nav-template 的 `.tag.<name>` CSS 块。
 
 ## 隐私 / 脱敏
 
