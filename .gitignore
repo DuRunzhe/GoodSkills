@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 测试产物
+output/
+_output/
+_screenshots/
+test_output/
+/tmp/test_output/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+.DS_Store
