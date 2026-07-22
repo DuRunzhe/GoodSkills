@@ -27,7 +27,10 @@ header h1{font-size:17px;margin:0 0 3px;}header p{font-size:11px;opacity:.95;mar
 </head>
 <body>
 
-<!-- ⚠️ 本文件是脱敏示例,数据用 __DATA_PLACEHOLDER__ 标记插入点 -->
+<!--
+⚠️ 本文件是脱敏示例,数据已预填(用 examples/pois.json)。
+要重新生成,跑:python scripts/gen_trip_artifacts.py ../examples/pois.json -o ../examples/
+-->
 
 <header>
   <h1>🚗 示例行程 · OSRM 实际路径综合地图</h1>
@@ -54,22 +57,17 @@ header h1{font-size:17px;margin:0 0 3px;}header p{font-size:11px;opacity:.95;mar
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-/* ==================== 数据(脱敏占位符) ==================== */
-/* 真实使用时,这里应该被 pois.json 里的数据替换(经过 GCJ-02→WGS-84) */
-/* 见 ../assets/overview-map-template.html 的 6 个 __XXX__ 占位符规范 */
-const pois = __POIS__;
-const dayRoutes = __DAY_ROUTES__;
-const specialRoutes = __SPECIAL_ROUTES__;
-const days = __DAYS__;
-const dayColors = __DAY_COLORS__;
-const tagColors = __TAG_COLORS__;
-const tagLabels = __TAG_LABELS__;
+const pois = [{"day":"D1","idx":1,"name":"起点","tag":"start","info":"示例起点 · 早上 8:00 出发","lng_gcj02":116.0,"lat_gcj02":40.0,"lng_wgs84":115.995,"lat_wgs84":39.9956,"coord_source":"original"},{"day":"D1","idx":2,"name":"服务区 A","tag":"service","info":"示例服务区 · 10:00 第一次休整","lng_gcj02":116.2,"lat_gcj02":40.2,"lng_wgs84":116.195,"lat_wgs84":40.1956,"coord_source":"fallback"},{"day":"D1","idx":3,"name":"景点 A","tag":"attract","info":"示例景点 · 12:30 抵达 · 游玩 2h","lng_gcj02":116.5,"lat_gcj02":40.5,"lng_wgs84":116.4948,"lat_wgs84":40.4952,"coord_source":"known"},{"day":"D2","idx":1,"name":"酒店 A","tag":"hotel","info":"示例酒店 · 入住 18:00","lng_gcj02":116.5,"lat_gcj02":40.5,"lng_wgs84":116.4948,"lat_wgs84":40.4952,"coord_source":"known"},{"day":"D2","idx":2,"name":"景点 B","tag":"attract","info":"示例景点 · 8:30 出发 · 2h 游玩","lng_gcj02":117.0,"lat_gcj02":41.0,"lng_wgs84":116.9946,"lat_wgs84":40.9948,"coord_source":"known"},{"day":"D2","idx":3,"name":"餐厅 A","tag":"food","info":"示例餐厅 · 12:30 午餐","lng_gcj02":116.8,"lat_gcj02":40.7,"lng_wgs84":116.7947,"lat_wgs84":40.6949,"coord_source":"fallback"},{"day":"D3","idx":1,"name":"景点 C","tag":"attract","info":"示例景点 · 9:00 出发 · 半日游","lng_gcj02":116.2,"lat_gcj02":40.3,"lng_wgs84":116.195,"lat_wgs84":40.2956,"coord_source":"known"},{"day":"D3","idx":2,"name":"服务区 B","tag":"service","info":"示例服务区 · 14:00 返程休整","lng_gcj02":116.1,"lat_gcj02":40.1,"lng_wgs84":116.095,"lat_wgs84":40.0956,"coord_source":"fallback"},{"day":"D3","idx":3,"name":"终点","tag":"end","info":"示例终点 · 17:00 抵达","lng_gcj02":116.0,"lat_gcj02":40.0,"lng_wgs84":115.995,"lat_wgs84":39.9956,"coord_source":"original"}];
+const dayRoutes = {"D1":[[115.995,39.9956],[116.2,40.1500],[116.4,40.3500],[116.4948,40.4952]],"D2":[[116.4948,40.4952],[116.7,40.7500],[116.9,40.9000],[116.9946,40.9948]],"D3":[[116.9946,40.9948],[116.5,40.6000],[116.3,40.4000],[116.195,40.2956],[116.05,40.1500],[115.995,39.9956]]};
+const specialRoutes = [{"label":"示例景观公路","color":"#FF6F00","weight":6,"waypoints":[[116.4948,40.4952],[116.65,40.7],[116.75,40.85],[116.9,40.95],[116.9946,40.9948]]}];
+const days = {"D1":"示例起点 → 景点 A","D2":"景点 A → 景点 B","D3":"景点 B → 终点"};
+const dayColors = {"D1":"#E53935","D2":"#1E88E5","D3":"#43A047"};
+const tagColors = {"start":"#00C853","end":"#D50000","attract":"#FF6F00","hotel":"#7B1FA2","food":"#FFB300","service":"#1976D2","stop":"#00838F"};
+const tagLabels = {"start":"起点","end":"终点","attract":"景点","hotel":"酒店","food":"餐厅","service":"服务区","stop":"驿站"};
 
-/* ==================== 地图初始化 ==================== */
 const map = L.map('map', {zoomControl: true}).setView([40.5, 116.5], 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18,
-  attribution: '© OpenStreetMap'
+  maxZoom: 18, attribution: '© OpenStreetMap'
 }).addTo(map);
 
 const markerLayer = L.layerGroup().addTo(map);
@@ -85,38 +83,31 @@ function render() {
   lineLayer.clearLayers();
   routeLayer.clearLayers();
   specialLayer.clearLayers();
-
-  const daysToShow = currentDay === 'all' ? Object.keys(days) : [currentDay];
+  const days2 = currentDay === 'all' ? Object.keys(days) : [currentDay];
   const allBounds = [];
-
-  daysToShow.forEach(function(day) {
+  days2.forEach(function(day) {
     const dayPois = pois.filter(function(p) { return p.day === day; });
-
     let pathLatLngs = null;
     if (currentMode === 'route' && dayRoutes[day] && dayRoutes[day].length >= 2) {
       pathLatLngs = dayRoutes[day].map(function(c) { return [c[1], c[0]]; });
     } else if (dayPois.length >= 2) {
       pathLatLngs = dayPois.map(function(p) { return [p.lat_wgs84, p.lng_wgs84]; });
     }
-
     if (pathLatLngs) {
       const layer = currentMode === 'route' ? routeLayer : lineLayer;
       L.polyline(pathLatLngs, {
-        color: dayColors[day],
-        weight: currentMode === 'route' ? 5 : 3,
+        color: dayColors[day], weight: currentMode === 'route' ? 5 : 3,
         opacity: currentMode === 'route' ? 0.85 : 0.6,
         dashArray: currentMode === 'route' ? null : '6,6'
       }).addTo(layer);
     }
-
     dayPois.forEach(function(p) {
       const color = tagColors[p.tag] || '#666';
       const isFallback = p.coord_source && p.coord_source.indexOf('fallback') === 0;
       const icon = L.divIcon({
         className: '',
         html: '<div style="background:' + color + ';color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,.3)' + (isFallback ? ';opacity:0.5' : '') + '">' + p.idx + '</div>',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
+        iconSize: [28, 28], iconAnchor: [14, 14]
       });
       const marker = L.marker([p.lat_wgs84, p.lng_wgs84], {icon: icon, title: p.name}).addTo(markerLayer);
       const amapUrl = 'https://uri.amap.com/navigation?to=' + p.lng_gcj02 + ',' + p.lat_gcj02 + ',' + encodeURIComponent(p.name) + '&mode=car&src=yourtag';
@@ -132,19 +123,15 @@ function render() {
       allBounds.push([p.lat_wgs84, p.lng_wgs84]);
     });
   });
-
   if (currentDay === 'all' || currentDay === 'D2') {
     specialRoutes.forEach(function(route) {
       if (!route.waypoints || route.waypoints.length < 2) return;
       const latlngs = route.waypoints.map(function(c) { return [c[1], c[0]]; });
       L.polyline(latlngs, {
-        color: route.color || '#FF6F00',
-        weight: route.weight || 6,
-        opacity: 0.9
+        color: route.color || '#FF6F00', weight: route.weight || 6, opacity: 0.9
       }).addTo(specialLayer).bindPopup(route.label || '特殊路线');
     });
   }
-
   if (allBounds.length > 0) map.fitBounds(allBounds, {padding: [50, 50]});
 }
 
