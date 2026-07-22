@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+⚠️ 本文件是脱敏示例,所有 POI 名 / 坐标都是占位符。
+真实使用时,根据 pois.json 数据生成。
+-->
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>示例行程</name>
+  <description>3 天示例行程 · 占位符数据 · 用于演示 KML 结构</description>
+
+  <!-- ========== Day 1 ========== -->
+  <Folder>
+    <name>D1 示例起点 → 景点 A</name>
+    <description>100km · 2h · 示例主题</description>
+
+    <Placemark>
+      <name>D1 行程连线</name>
+      <Style><LineStyle><color>ffE53935</color><width>3</width></LineStyle></Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>
+          116.000000,40.000000,0
+          116.200000,40.200000,0
+          116.500000,40.500000,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+
+    <Placemark>
+      <name>1. 起点</name>
+      <description><![CDATA[
+示例起点 · 早上 8:00 出发
+<br/><br/>
+标签: start
+<br/>
+坐标(GCJ-02): 116.000000, 40.000000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.000000,40.000000,起点&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff00C853</color>
+          <scale>1.0</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point><coordinates>116.000000,40.000000,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>2. 服务区 A</name>
+      <description><![CDATA[
+示例服务区 · 10:00 第一次休整
+<br/><br/>
+标签: service
+<br/>
+坐标(GCJ-02): 116.200000, 40.200000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.200000,40.200000,服务区%20A&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff1976D2</color>
+          <scale>1.0</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point><coordinates>116.200000,40.200000,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>3. 景点 A</name>
+      <description><![CDATA[
+示例景点 · 12:30 抵达 · 游玩 2h
+<br/><br/>
+标签: attract
+<br/>
+坐标(GCJ-02): 116.500000, 40.500000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.500000,40.500000,景点%20A&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style>
+        <IconStyle>
+          <color>ffFF6F00</color>
+          <scale>1.0</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point><coordinates>116.500000,40.500000,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+
+  <!-- ========== Day 2 ========== -->
+  <Folder>
+    <name>D2 景点 A → 景点 B</name>
+    <description>80km · 3h · 示例主题</description>
+
+    <Placemark>
+      <name>D2 行程连线</name>
+      <Style><LineStyle><color>ff1E88E5</color><width>3</width></LineStyle></Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>
+          116.500000,40.500000,0
+          116.800000,40.700000,0
+          117.000000,41.000000,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+
+    <Placemark>
+      <name>1. 景点 A</name>
+      <description><![CDATA[
+示例景点 · 8:30 出发
+<br/><br/>
+标签: attract
+<br/>
+坐标(GCJ-02): 116.500000, 40.500000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.500000,40.500000,景点%20A&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style><IconStyle><color>ffFF6F00</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>116.500000,40.500000,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>2. 餐厅 A</name>
+      <description><![CDATA[
+示例餐厅 · 12:30 午餐
+<br/><br/>
+标签: food
+<br/>
+坐标(GCJ-02): 116.800000, 40.700000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.800000,40.700000,餐厅%20A&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style><IconStyle><color>ffFFB300</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>116.800000,40.700000,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>3. 景点 B</name>
+      <description><![CDATA[
+示例景点 · 11:00 抵达 · 游玩 2h
+<br/><br/>
+标签: attract
+<br/>
+坐标(GCJ-02): 117.000000, 41.000000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=117.000000,41.000000,景点%20B&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style><IconStyle><color>ffFF6F00</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>117.000000,41.000000,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>4. 酒店 A</name>
+      <description><![CDATA[
+示例酒店 · 18:00 入住
+<br/><br/>
+标签: hotel
+<br/>
+坐标(GCJ-02): 116.500000, 40.500000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.500000,40.500000,酒店%20A&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style><IconStyle><color>ff7B1FA2</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>116.500000,40.500000,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+
+  <!-- ========== Day 3 ========== -->
+  <Folder>
+    <name>D3 景点 B → 终点</name>
+    <description>150km · 4h · 示例主题</description>
+
+    <Placemark>
+      <name>D3 行程连线</name>
+      <Style><LineStyle><color>ff43A047</color><width>3</width></LineStyle></Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>
+          117.000000,41.000000,0
+          116.200000,40.300000,0
+          116.100000,40.100000,0
+          116.000000,40.000000,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+
+    <Placemark>
+      <name>1. 景点 C</name>
+      <description><![CDATA[
+示例景点 · 9:00 出发 · 半日游
+<br/><br/>
+标签: attract
+<br/>
+坐标(GCJ-02): 116.200000, 40.300000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.200000,40.300000,景点%20C&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style><IconStyle><color>ffFF6F00</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>116.200000,40.300000,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>2. 服务区 B</name>
+      <description><![CDATA[
+示例服务区 · 14:00 返程休整
+<br/><br/>
+标签: service
+<br/>
+坐标(GCJ-02): 116.100000, 40.100000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.100000,40.100000,服务区%20B&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style><IconStyle><color>ff1976D2</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>116.100000,40.100000,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>3. 终点</name>
+      <description><![CDATA[
+示例终点 · 17:00 抵达
+<br/><br/>
+标签: end
+<br/>
+坐标(GCJ-02): 116.000000, 40.000000
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.000000,40.000000,终点&mode=car&src=yourtag">点这里导航</a>
+      ]]></description>
+      <Style><IconStyle><color>ffD50000</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>116.000000,40.000000,0</coordinates></Point>
+    </Placemark>
+  </Folder>
+
+  <!-- ========== 特殊路线示例 ========== -->
+  <Folder>
+    <name>★ 示例景观公路</name>
+    <description>OSRM 不识别的命名公路,用预设 waypoint 兜底</description>
+    <Placemark>
+      <name>示例景观公路</name>
+      <Style><LineStyle><color>ffFF6F00</color><width>5</width></LineStyle></Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>
+          116.500000,40.500000,0
+          116.650000,40.700000,0
+          116.800000,40.900000,0
+          117.000000,41.000000,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Folder>
+
+</Document>
+</kml>

@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Trip POI Data",
+  "description": "一趟多日旅行的标准化 POI 数据结构。同时支持 GCJ-02(高德)和 WGS-84(OSM/OSRM)。",
+  "type": "object",
+  "required": ["pois", "day_routes_wgs84", "days_summary"],
+  "properties": {
+    "pois": {
+      "type": "array",
+      "description": "所有 POI 列表,按 Day × idx 顺序排列",
+      "items": {
+        "type": "object",
+        "required": ["day", "idx", "name", "tag", "info", "lng_gcj02", "lat_gcj02", "lng_wgs84", "lat_wgs84", "coord_source"],
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^D[0-9]+$",
+            "description": "Day 编号,如 D1 / D2"
+          },
+          "idx": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "POI 在 Day 内的序号,从 1 开始"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "POI 名称(中文 / 英文 / 当地语言均可)"
+          },
+          "tag": {
+            "type": "string",
+            "enum": ["start", "end", "attract", "hotel", "food", "service", "stop"],
+            "description": "POI 类别,影响颜色和图标"
+          },
+          "info": {
+            "type": "string",
+            "description": "POI 描述:时间 / 玩法 / 注意事项等。例:'8:30 · 蓝齐格格传说 · 欧式草原湖泊'"
+          },
+          "lng_gcj02": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "GCJ-02 经度(高德坐标系)。为 0 表示未获取精确坐标。"
+          },
+          "lat_gcj02": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "GCJ-02 纬度(高德坐标系)。为 0 表示未获取精确坐标。"
+          },
+          "lng_wgs84": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "WGS-84 经度(OSM 坐标系)。由 GCJ-02 转换或直接获取。"
+          },
+          "lat_wgs84": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "WGS-84 纬度(OSM 坐标系)。由 GCJ-02 转换或直接获取。"
+          },
+          "coord_source": {
+            "type": "string",
+            "enum": ["original", "known", "fallback"],
+            "description": "坐标获取质量。original=博客自带精确坐标;known=公开资料常用坐标;fallback=city 中心 + 抖动"
+          }
+        }
+      }
+    },
+    "day_routes_wgs84": {
+      "type": "object",
+      "description": "每 Day 的实际驾车路径(从 OSRM 拉取,转 WGS-84)。key 是 day_id,value 是 [[lng, lat], ...] 数组。",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "special_routes_wgs84": {
+      "type": "array",
+      "description": "特殊路线(99号公路等 OSRM 不识别的命名公路),用预设 waypoint 数组",
+      "items": {
+        "type": "object",
+        "required": ["label", "waypoints"],
+        "properties": {
+          "label": { "type": "string" },
+          "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "weight": { "type": "integer", "minimum": 1, "maximum": 10 },
+          "waypoints": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        }
+      }
+    },
+    "days_summary": {
+      "type": "object",
+      "description": "Day 汇总(用于渲染顶部 Day 过滤按钮 / 图例)",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["title", "desc", "count"],
+        "properties": {
+          "title": { "type": "string" },
+          "desc": { "type": "string" },
+          "count": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

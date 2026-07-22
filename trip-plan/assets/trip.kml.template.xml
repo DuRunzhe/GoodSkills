@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+================================================================
+📚 KML 模板(用于高德地图 App 导入)
+
+必含结构:
+  1. <Document> 顶层
+  2. <name> 行程名
+  3. <description> 描述
+  4. 每 Day 一个 <Folder>:
+     - name: "D1 标题"
+     - description: "里程 · 时长"
+     - 1 个行程连线 <Placemark>(LineString)
+     - N 个 POI <Placemark>(Point)
+  5. 特殊路线单独 1 个 <Folder>:
+     - 99 号公路 / 达达线 / 热阿线等命名公路
+     - 用预设 waypoint LineString 画
+
+坐标:GCJ-02(高德直接解析)
+图标:黄/橙/紫等不同 tag 颜色用 IconStyle.color
+================================================================
+-->
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>{trip_title}</name>
+  <description>{trip_description}</description>
+
+  <!-- ========== Day 1 ========== -->
+  <Folder>
+    <name>D1 {day1_title}</name>
+    <description>{day1_desc}</description>
+
+    <!-- Day 1 行程连线(POI 顺序连接) -->
+    <Placemark>
+      <name>D1 行程连线</name>
+      <Style><LineStyle><color>ff{day1_color}</color><width>3</width></LineStyle></Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>
+          {poi1_lng_gcj02},{poi1_lat_gcj02},0
+          {poi2_lng_gcj02},{poi2_lat_gcj02},0
+          {poi3_lng_gcj02},{poi3_lat_gcj02},0
+          <!-- 按 POI 顺序加更多 -->
+        </coordinates>
+      </LineString>
+    </Placemark>
+
+    <!-- Day 1 每个 POI 一个 Placemark -->
+    <Placemark>
+      <name>1. {poi1_name}</name>
+      <description><![CDATA[
+{poi1_info}
+<br/><br/>
+标签: {poi1_tag}
+<br/>
+坐标(GCJ-02): {poi1_lng_gcj02}, {poi1_lat_gcj02}
+<br/>
+高德导航: <a href="https://uri.amap.com/navigation?to={poi1_lng_gcj02},{poi1_lat_gcj02},{poi1_name}&mode=car&src={src}">点这里导航</a>
+      ]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff{poi1_color}</color>
+          <scale>1.0</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point><coordinates>{poi1_lng_gcj02},{poi1_lat_gcj02},0</coordinates></Point>
+    </Placemark>
+
+    <!-- 按需加 POI 2 / 3 / 4 / 5 -->
+  </Folder>
+
+  <!-- ========== Day 2 / Day 3 / ... ========== -->
+  <Folder>
+    <name>D2 {day2_title}</name>
+    <description>{day2_desc}</description>
+    <!-- 同样的 Placemark 模式 -->
+  </Folder>
+
+  <!-- ========== 特殊路线(如 99号公路) ========== -->
+  <Folder>
+    <name>★ {special_route_name}</name>
+    <description>{special_route_desc}</description>
+    <Placemark>
+      <name>{special_route_name}</name>
+      <Style><LineStyle><color>ff{special_color}</color><width>5</width></LineStyle></Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>
+          {wp1_lng_gcj02},{wp1_lat_gcj02},0
+          {wp2_lng_gcj02},{wp2_lat_gcj02},0
+          {wp3_lng_gcj02},{wp3_lat_gcj02},0
+          <!-- 按 waypoint 顺序 -->
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Folder>
+
+</Document>
+</kml>
