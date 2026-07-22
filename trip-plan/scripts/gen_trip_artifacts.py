@@ -27,6 +27,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from osrm_route import get_day_routes
 from assign_day_colors import assign_day_colors
 from validate import validate_data
+from gen_trip_nav import gen_trip_nav as _gen_trip_nav
 
 # 同目录 assets/ 的模板
 TEMPLATE_DIR = SCRIPT_DIR.parent / 'assets'
@@ -243,12 +244,10 @@ def main():
             result.report()
 
     print(f'\n生成产物到 {out_dir}/:')
+    _gen_trip_nav(data, out_dir / 'trip-nav.html', amap_src=args.src)
     gen_overview_map(data, out_dir / 'trip-overview-map.html',
                      amap_src=args.src, use_osrm=not args.no_osrm)
     gen_kml(data, out_dir / 'trip.kml', amap_src=args.src)
-
-    # nav.html 暂不自动生成(需要复杂的 day section 替换)
-    print(f'  nav.html: 需手动从 assets/nav-template.html 复制并填入 Day section')
 
     print(f'\n✅ 完成。后续:用 scripts/screenshot_html.py 截总览+每 Day 图')
 
