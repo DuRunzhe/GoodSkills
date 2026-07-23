@@ -387,6 +387,7 @@ trip-plan/
 │   ├── gen_trip_artifacts.py         # 综合地图 + KML
 │   └── screenshot_html.py            # Playwright 截图
 ├── examples/                         # 示例
+│   ├── README.md
 │   ├── pois.json
 │   ├── trip-guide.md
 │   ├── trip-nav.html
