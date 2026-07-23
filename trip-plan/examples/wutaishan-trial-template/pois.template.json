@@ -1,0 +1,40 @@
+{
+  "_comment": "五台山 LLM 填充模板 · 用 {placeholder} 标记 LLM 需替换的位置 · GCJ-02 字段为 null,跑 gcj02_wgs84.py 填充",
+  "_schema_ref": "../../assets/pois.schema.json",
+  "metadata": {
+    "title": "{trip_title}",
+    "route_summary": "{route_summary}",
+    "trip_slug": "{trip-slug}"
+  },
+  "pois": [
+    {
+      "day": "D1",
+      "idx": 1,
+      "tag": "start",
+      "name": "{POI_NAME}",
+      "info": "{POI_INFO · 时段 + 简介 ≤ 100 字}",
+      "lng_wgs84": 0.0,
+      "lat_wgs84": 0.0,
+      "lng_gcj02": null,
+      "lat_gcj02": null,
+      "coord_source": "{original|known|fallback}"
+    }
+  ],
+  "days_summary": {
+    "D1": {
+      "title": "{D1_title}",
+      "desc": "{D1_desc}"
+    }
+  },
+  "day_routes_wgs84": {},
+  "special_routes_wgs84": [],
+  "_template_usage": [
+    "1. 复制本文件 → 你的 {trip-slug}.json",
+    "2. 替换所有 {placeholder} 为真实数据",
+    "3. 添加 POI(每个 Day 按 idx 顺序)",
+    "4. python3 scripts/gcj02_wgs84.py your.json your.json --mode to_gcj02",
+    "5. python3 scripts/validate.py your.json --strict",
+    "6. python3 scripts/gen_trip_nav.py your.json your-nav.html --src {src}",
+    "7. python3 scripts/gen_trip_artifacts.py your.json -o ./output --src {src}"
+  ]
+}
