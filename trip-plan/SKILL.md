@@ -16,6 +16,7 @@ description: 旅行攻略智能生成 skill。基于 SKILL.md + destinations/<sl
 | ✅ SKILL.md + scripts + 知识库 | ❌ 有状态机的独立程序 |
 | ✅ LLM 是 runtime | ❌ orchestrator 程序 |
 | ✅ Scripts 是 LLM 可调用的工具 | ❌ 流水线 stage |
+| ✅ Destinations/<slug>.md 是 LLM 可读的知识 | ❌ 一个独立的微服务 |
 | ✅ 5 步推理是逻辑顺序 | ❌ 程序模块串行执行 |
 
 **本 skill 的智能来自**:
@@ -243,16 +244,7 @@ git commit -m "feat(trip-map): <目的地>攻略"
 git push origin main
 ```
 
-**质量门(部署前必过)**:
-
-- [ ] 所有 POI 有有效坐标(`coord_source != fallback` 或已标核实)
-- [ ] 所有链接可达(高德 / 官网 / 预约电话)
-- [ ] 移动端预览通过(截图自检)
-- [ ] LLM 文案无幻觉 / 无重复(关键事实标源)
-- [ ] 路线几何完整(D1 / D2 都有 OSRM 路径)
-- [ ] 必去点全部出现
-- [ ] 时段无冲突(用餐 / 开放时间)
-- [ ] 目的地专属提醒完整(从 playbook 抽取)
+**质量门(部署前必过)**:见本文末尾「验证清单(部署前质量门)」章节(10 项完整版)
 
 ---
 
@@ -370,6 +362,8 @@ trip-plan/
 ├── assets/                           # 模板
 │   ├── nav-template.html
 │   ├── overview-map-template.html
+│   ├── guide-template.md
+│   ├── trip.kml.template.xml
 │   └── pois.schema.json
 ├── references/                       # LLM 推理参考
 │   ├── input-format.md

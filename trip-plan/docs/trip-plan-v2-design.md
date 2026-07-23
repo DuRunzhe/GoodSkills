@@ -345,8 +345,8 @@ git push origin main
 ## 3.6 数据约定(LLM 在 Step 1-5 必须遵守)
 
 **优先级分层**:
-- **必填**(#4.6.1 标签 / #4.6.2 坐标精度):产物结构强制,违反则产物无效
-- **推荐**(#4.6.3 输入形式):LLM 抽取辅助,违反不会让产物无效,只是精度低
+- **必填**(#3.6.1 标签 / #3.6.2 坐标精度):产物结构强制,违反则产物无效
+- **推荐**(#3.6.3 输入形式):LLM 抽取辅助,违反不会让产物无效,只是精度低
 
 ### 3.6.1 标签体系
 
@@ -451,7 +451,7 @@ season: 夏季最佳(6-9月)
 
 | 任务 | 工作量 | 产出 |
 |---|---|---|
-| A.1 重写 SKILL.md:加完整的「5 步推理指引」+ 「工具调用清单」+ 「规则引擎自检清单」 | 2d | SKILL.md v2(估计 300-400 行) |
+| A.1 重写 SKILL.md:加完整的「5 步推理指引」+ 「工具调用清单」+ 「规则引擎自检清单」 | 2d | SKILL.md v2(实际 441 行) |
 | A.2 写 destinations/wutaishan.md(playbook v1) | 0.5d | 五台山 playbook |
 
 **验收**:SKILL.md v2 + 五台山 playbook 完成。LLM 读这两份文档后,能独立产出符合 §3.6 数据约定 + §3.5 质量门(完整 10 项)的生产级产物。
@@ -463,7 +463,7 @@ season: 夏季最佳(6-9月)
 简单 TSP vs Google OR-Tools,投入产出比如何?
 
 - 五台山这类 2-5 天 15-20 POI,LLM 直接推理够用
-- 川藏 10+ 天 50+ POI,需要脚本辅助(Phase B.1)
+- 川藏 10+ 天 50+ POI,需要脚本辅助(Phase B.1 optimize_route.py,已删 — 本 ADR 为历史决策记录)
 - **建议**:先靠 LLM 推理,验证不够用再写 optimize_route.py
 
 ### 6.3 数据源成本
@@ -475,7 +475,7 @@ season: 夏季最佳(6-9月)
 | 公众号抓取 | 免费但 ToS 风险 | P2 谨慎 |
 | LLM 调用 | token 成本 | P0 必须 |
 
-**建议**:LLM 走 web_search(便宜)、脚本做缓存复用、API 调用按月限额
+**建议**:LLM 走 web_search(便宜)、脚本做缓存复用(B.2 enrich_pois.py,已删 — 本 ADR 为历史决策记录)、API 调用按月限额
 
 ### 6.4 私密信息保护
 
@@ -529,8 +529,8 @@ season: 夏季最佳(6-9月)
 
 ## 附录 C · 与其他 skill 的协作
 
-- **wechat_spander**:Phase 2 公众号抓取(已存在)
-- **web_search / web_fetch**:Phase 1-2 通用检索
+- **wechat_spander**: 公众号抓取(已存在)
+- **web_search / web_fetch**: 通用检索
 - **memory_search**:Playbook 命中率 / 历史行程参考
 - **session_summary**:行程结束后归档
 - **update_goal**:多日行程的进度跟踪
