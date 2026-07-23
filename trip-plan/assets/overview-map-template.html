@@ -50,7 +50,7 @@ header h1{font-size:17px;margin:0 0 3px;}header p{font-size:11px;opacity:.95;mar
 数据替换占位符:
   __POIS__         → 完整 POI 列表(从 pois.json 拷贝)
   __DAY_ROUTES__   → {D1: [[lng,lat],...], D2: [...], ...}(WGS-84,每段 1k-12k 点)
-  __SPECIAL_ROUTES__ → 特殊路线 waypoint 数组(99号公路等)
+  __SPECIAL_ROUTES__ → 特殊路线 waypoint 数组（每项可选 day 字段控制所属 Day）
   __DAYS__         → {D1: "标题", D2: "标题", ...}
   __DAY_COLORS__   → {D1: "#E53935", D2: "#1E88E5", ...}
   __TAG_COLORS__   → {start: "#00C853", attract: "#FF6F00", ...}
@@ -168,17 +168,17 @@ function render() {
   });
 
   // 特殊路线(如 99号公路)
-  if (currentDay === 'all' || currentDay === 'D{special_day}') {
-    specialRoutes.forEach(function(route) {
-      if (!route.waypoints || route.waypoints.length < 2) return;
-      const latlngs = route.waypoints.map(function(c) { return [c[1], c[0]]; });
-      L.polyline(latlngs, {
-        color: route.color || '#FF6F00',
-        weight: route.weight || 6,
-        opacity: 0.9
-      }).addTo(specialLayer).bindPopup(route.label || '特殊路线');
-    });
-  }
+  specialRoutes.forEach(function(route) {
+    // 过滤:每条特殊路线有可选的 day 字段;不设则 'all' 才显示
+    if (currentDay !== 'all' && route.day && currentDay !== route.day) return;
+    if (!route.waypoints || route.waypoints.length < 2) return;
+    const latlngs = route.waypoints.map(function(c) { return [c[1], c[0]]; });
+    L.polyline(latlngs, {
+      color: route.color || '#FF6F00',
+      weight: route.weight || 6,
+      opacity: 0.9
+    }).addTo(specialLayer).bindPopup(route.label || '特殊路线');
+  });
 
   if (allBounds.length > 0) map.fitBounds(allBounds, {padding: [50, 50]});
 }

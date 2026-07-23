@@ -60,7 +60,6 @@ def gen_overview_map(data, output_path, amap_src='yourtag', use_osrm=True):
     html = html.replace('{trip_summary}', f"{len(days)} 天 · {len(pois)} POI")
     html = html.replace('{init_lat}', '40.5').replace('{init_lng}', '116.5').replace('{init_zoom}', '7')
     html = html.replace('{src}', amap_src)
-    html = html.replace('{special_day}', 'D4')  # 99号公路在 D4
 
     html = html.replace('__POIS__', json.dumps(pois, ensure_ascii=False))
     html = html.replace('__DAY_ROUTES__', json.dumps(routes, ensure_ascii=False))

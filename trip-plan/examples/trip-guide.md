@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "示例行程 · 3 天 2 地脱敏示例"
-date: {YYYY-MM-DD}
+date: 2026-07-23
 categories: [trip, self-drive]
 tags: [示例, 占位符, 模板演示]
 ---
@@ -57,7 +57,7 @@ tags: [示例, 占位符, 模板演示]
 | D2 | 景点 A → 景点 B | 80km | 3h | 示例主题 |
 | D3 | 景点 B → 终点 | 150km | 4h | 示例主题 |
 
-![路线总览]({overview_map_screenshot_url})
+![路线总览](trip-overview-map.html)
 
 ## 🎒 行前必带
 
@@ -76,7 +76,7 @@ tags: [示例, 占位符, 模板演示]
 ### 药品
 - 感冒药 / 肠胃药 / 创可贴
 
-## D1 {date} · 示例起点 → 景点 A
+## D1 示例日期 · 示例起点 → 景点 A
 
 **100km · 2h · 示例主题**
 
@@ -108,7 +108,7 @@ tags: [示例, 占位符, 模板演示]
 - 📍 [高德导航](https://uri.amap.com/navigation?to=116.500000,40.500000,景点%20A&mode=car&src=yourtag)
 - 示例景点,游玩 2h
 
-## D2 {date} · 景点 A → 景点 B
+## D2 示例日期 · 景点 A → 景点 B
 
 **80km · 3h · 示例主题**
 
@@ -135,7 +135,7 @@ tags: [示例, 占位符, 模板演示]
 - 📍 [高德导航](https://uri.amap.com/navigation?to=116.800000,40.700000,餐厅%20A&mode=car&src=yourtag)
 - 示例餐厅,人均 ¥80
 
-## D3 {date} · 景点 B → 终点
+## D3 示例日期 · 景点 B → 终点
 
 **150km · 4h · 示例主题**
 
@@ -184,9 +184,9 @@ tags: [示例, 占位符, 模板演示]
 
 ## 📎 配套产物
 
-- 🗺 [高德导航点位页]({trip-slug}-trip-map.html) — 手机打开即可点 POI 唤起高德 App 导航
-- 🆕 [OSRM 实际路径综合地图]({trip-slug}-trip-map-v1.html) — 浏览器查看 3 天真实驾车路径
-- 📦 [原始数据 JSON]({trip-slug}.pois.json) — 程序化消费
+- 🗺 [高德导航点位页](example-trip-map.html) — 手机打开即可点 POI 唤起高德 App 导航
+- 🆕 [OSRM 实际路径综合地图](example-trip-map-v1.html) — 浏览器查看 3 天真实驾车路径
+- 📦 [原始数据 JSON](example.pois.json) — 程序化消费
 
 ---
 
