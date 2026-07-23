@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🚗 五台山 3 天古建深度(佛光寺+南禅寺朝圣) · 高德导航点位</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f5f6f8;
+  padding-bottom: 60px;
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  background: linear-gradient(135deg, #FF6F00 0%, #FF8F00 100%);
+  color: white;
+  padding: 20px 18px 18px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+header h1 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+header p { font-size: 12px; opacity: 0.95; }
+header p .route { font-weight: 600; }
+
+.day-nav {
+  background: white;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  position: sticky;
+  top: 76px;
+  z-index: 99;
+  border-bottom: 1px solid #e8eaec;
+  -webkit-overflow-scrolling: touch;
+}
+.day-nav::-webkit-scrollbar { display: none; }
+.day-nav a {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-right: 6px;
+  background: #f0f1f3;
+  color: #555;
+  border-radius: 14px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.day-nav a.active, .day-nav a:active {
+  background: #FF6F00;
+  color: white;
+}
+
+.day { padding: 16px 14px; }
+
+.day-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(to right, #fff5e6, white);
+  border-left: 5px solid #FF6F00;
+  border-radius: 4px;
+}
+.day-title .day-num { font-size: 20px; font-weight: 700; color: #FF6F00; margin-right: 10px; }
+.day-title .day-info { flex: 1; }
+.day-title h2 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
+.day-title .meta { font-size: 11px; color: #888; }
+.day-title .route-arrow { font-size: 16px; color: #FF6F00; font-weight: 600; }
+
+.group { margin-bottom: 18px; }
+.group-title {
+  font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px; padding: 0 4px;
+  display: flex; align-items: center;
+}
+.group-title .emoji { margin-right: 6px; font-size: 15px; }
+
+.poi {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ecedef;
+}
+
+.poi-name {
+  font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.poi-name .tag {
+  font-size: 10px; font-weight: 500; padding: 2px 7px;
+  border-radius: 10px; white-space: nowrap; margin-left: 8px;
+}
+
+.tag.attract   { background: #fef0ef; color: #c7392b; }
+.tag.hotel     { background: #f0ecfa; color: #6b46c1; }
+.tag.food      { background: #fff5e8; color: #d97706; }
+.tag.service   { background: #e0f0fc; color: #2563eb; }
+.tag.optional  { background: #f0f9ff; color: #0891b2; }
+.tag.peak      { background: #fff8e1; color: #f57f17; }
+.tag.stop      { background: #e3f2fd; color: #1565c0; }
+.tag.start     { background: #e8f5e9; color: #2d7d46; }
+.tag.end       { background: #fce4ec; color: #c62828; }
+
+.poi-info {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.poi-info .price { color: #FF6F00; font-weight: 600; }
+
+.poi-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.poi-actions a {
+  flex: 1 1 calc(50% - 3px);
+  min-width: 88px;
+  display: block;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.2s;
+}
+.poi-actions a:active { opacity: 0.7; }
+
+.btn-nav    { background: #FF6F00; color: white; }
+.btn-marker { background: #f0f1f3; color: #555; }
+.btn-search { background: #e8eaec; color: #555; }
+
+.usage {
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  margin: 16px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.usage h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #FF6F00;
+}
+.usage ol {
+  padding-left: 22px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.7;
+}
+.usage .tip {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #888;
+  padding: 8px 10px;
+  background: #fff8e1;
+  border-radius: 6px;
+}
+
+.to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FF6F00;
+  color: white;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 50;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== 顶部 ========== -->
+<header>
+  <h1>🚗 五台山 3 天古建深度(佛光寺+南禅寺朝圣)</h1>
+  <p><span class="route">北京 → 保定 → 忻州 → 五台山 → 佛光寺 → 南禅寺 → 北京</span></p>
+  <p style="margin-top:4px;">3 天 · 16 POI · 点击任意点位 → 高德 App 自动导航</p>
+</header>
+
+<!-- 日期快速跳转 -->
+<nav class="day-nav" id="dayNav">
+  <a href="#day1">D1 北京 → 五台山(台怀镇)</a>
+  <a href="#day2">D2 佛光寺 + 南禅寺 + 台怀镇核心</a>
+  <a href="#day3">D3 返京</a>
+</nav>
+
+<!-- ========== Day 区段 ========== -->
+<section class="day" id="day1">
+  <div class="day-title">
+    <span class="day-num">D1</span>
+    <div class="day-info">
+      <h2>北京 → 五台山(台怀镇)</h2>
+      <div class="meta">约 360km · 5h · 五爷庙+显通寺+塔院寺</div>
+    </div>
+    <span class="route-arrow">→</span>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏁</span>出发</div>
+    <div class="poi">
+      <div class="poi-name">顺义枫泉花园
+        <span class="tag start">起点</span>
+      </div>
+      <div class="poi-info">北京顺义出发 · 7:00 走京昆高速</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=116.659905,40.129109,%E9%A1%BA%E4%B9%89%E6%9E%AB%E6%B3%89%E8%8A%B1%E5%9B%AD&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=116.659905,40.129109,%E9%A1%BA%E4%B9%89%E6%9E%AB%E6%B3%89%E8%8A%B1%E5%9B%AD&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E9%A1%BA%E4%B9%89%E6%9E%AB%E6%B3%89%E8%8A%B1%E5%9B%AD&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">⛽</span>服务区/中转</div>
+    <div class="poi">
+      <div class="poi-name">保定服务区
+        <span class="tag service">服务区</span>
+      </div>
+      <div class="poi-info">京昆高速中段休整 · 9:30 · 约 130km</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=115.506183,38.850787,%E4%BF%9D%E5%AE%9A%E6%9C%8D%E5%8A%A1%E5%8C%BA&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=115.506183,38.850787,%E4%BF%9D%E5%AE%9A%E6%9C%8D%E5%8A%A1%E5%8C%BA&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E4%BF%9D%E5%AE%9A%E6%9C%8D%E5%8A%A1%E5%8C%BA&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏛</span>景点（3 个）</div>
+    <div class="poi">
+      <div class="poi-name">五爷庙
+        <span class="tag attract">景点</span>
+      </div>
+      <div class="poi-info">求财最灵 · 香火最旺 · D1 下午首站</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.600038,39.083199,%E4%BA%94%E7%88%B7%E5%BA%99&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.600038,39.083199,%E4%BA%94%E7%88%B7%E5%BA%99&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E4%BA%94%E7%88%B7%E5%BA%99&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+    <div class="poi">
+      <div class="poi-name">显通寺
+        <span class="tag attract">景点</span>
+      </div>
+      <div class="poi-info">五大禅处之首 · 青铜殿 + 铜塔 + 无量殿(国内唯一青铜建筑群)</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.600537,39.081698,%E6%98%BE%E9%80%9A%E5%AF%BA&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.600537,39.081698,%E6%98%BE%E9%80%9A%E5%AF%BA&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E6%98%BE%E9%80%9A%E5%AF%BA&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+    <div class="poi">
+      <div class="poi-name">塔院寺
+        <span class="tag attract">景点</span>
+      </div>
+      <div class="poi-info">五台山标志性大白塔 · 转塔祈福</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.601037,39.083199,%E5%A1%94%E9%99%A2%E5%AF%BA&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.601037,39.083199,%E5%A1%94%E9%99%A2%E5%AF%BA&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E5%A1%94%E9%99%A2%E5%AF%BA&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏨</span>住宿</div>
+    <div class="poi">
+      <div class="poi-name">台怀镇民宿
+        <span class="tag hotel">首选</span>
+      </div>
+      <div class="poi-info">台内民宿 · 21:00 入住</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.601537,39.082698,%E5%8F%B0%E6%80%80%E9%95%87%E6%B0%91%E5%AE%BF&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.601537,39.082698,%E5%8F%B0%E6%80%80%E9%95%87%E6%B0%91%E5%AE%BF&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E5%8F%B0%E6%80%80%E9%95%87%E6%B0%91%E5%AE%BF&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🍜</span>餐厅</div>
+    <div class="poi" style="opacity:0.7;">
+      <div class="poi-name">素斋晚餐
+        <span class="tag food">餐厅</span>
+      </div>
+      <div class="poi-info">寿宁寺 / 普化寺素斋 · 17:30 时段</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=0,0,%E7%B4%A0%E6%96%8B%E6%99%9A%E9%A4%90&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E7%B4%A0%E6%96%8B%E6%99%9A%E9%A4%90&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="day" id="day2">
+  <div class="day-title">
+    <span class="day-num">D2</span>
+    <div class="day-info">
+      <h2>佛光寺 + 南禅寺 + 台怀镇核心</h2>
+      <div class="meta">约 80km · 12h · 国宝中的国宝</div>
+    </div>
+    <span class="route-arrow">→</span>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏛</span>景点（4 个）</div>
+    <div class="poi">
+      <div class="poi-name">佛光寺
+        <span class="tag attract">景点</span>
+      </div>
+      <div class="poi-info">国宝中的国宝 · 东大殿(唐) · 文殊殿(金) · 祖师塔(北魏)</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.322916,39.045425,%E4%BD%9B%E5%85%89%E5%AF%BA&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.322916,39.045425,%E4%BD%9B%E5%85%89%E5%AF%BA&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E4%BD%9B%E5%85%89%E5%AF%BA&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+    <div class="poi">
+      <div class="poi-name">南禅寺
+        <span class="tag attract">景点</span>
+      </div>
+      <div class="poi-info">亚洲现存最古木构(782 年) · 17 尊唐代塑像 · 佛光寺南 5km</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.275826,39.022846,%E5%8D%97%E7%A6%85%E5%AF%BA&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.275826,39.022846,%E5%8D%97%E7%A6%85%E5%AF%BA&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E5%8D%97%E7%A6%85%E5%AF%BA&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+    <div class="poi">
+      <div class="poi-name">殊像寺
+        <span class="tag attract">景点</span>
+      </div>
+      <div class="poi-info">文殊菩萨最大铜像(5 层楼高) · 壮观</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.59704,39.079698,%E6%AE%8A%E5%83%8F%E5%AF%BA&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.59704,39.079698,%E6%AE%8A%E5%83%8F%E5%AF%BA&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E6%AE%8A%E5%83%8F%E5%AF%BA&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+    <div class="poi">
+      <div class="poi-name">菩萨顶
+        <span class="tag attract">景点</span>
+      </div>
+      <div class="poi-info">康熙乾隆行宫 · 108 级台阶 · 红墙黄瓦</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.605536,39.088202,%E8%8F%A9%E8%90%A8%E9%A1%B6&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.605536,39.088202,%E8%8F%A9%E8%90%A8%E9%A1%B6&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E8%8F%A9%E8%90%A8%E9%A1%B6&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏨</span>住宿</div>
+    <div class="poi">
+      <div class="poi-name">台怀镇民宿
+        <span class="tag hotel">首选</span>
+      </div>
+      <div class="poi-info">续住 D1 民宿 · 21:00</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=113.601537,39.082698,%E5%8F%B0%E6%80%80%E9%95%87%E6%B0%91%E5%AE%BF&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=113.601537,39.082698,%E5%8F%B0%E6%80%80%E9%95%87%E6%B0%91%E5%AE%BF&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E5%8F%B0%E6%80%80%E9%95%87%E6%B0%91%E5%AE%BF&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🍜</span>餐厅</div>
+    <div class="poi" style="opacity:0.7;">
+      <div class="poi-name">台怀镇午餐
+        <span class="tag food">餐厅</span>
+      </div>
+      <div class="poi-info">返台怀镇午餐 · 12:00 · 蒙汉兼容餐厅</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=0,0,%E5%8F%B0%E6%80%80%E9%95%87%E5%8D%88%E9%A4%90&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E5%8F%B0%E6%80%80%E9%95%87%E5%8D%88%E9%A4%90&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="day" id="day3">
+  <div class="day-title">
+    <span class="day-num">D3</span>
+    <div class="day-info">
+      <h2>返京</h2>
+      <div class="meta">约 360km · 5h · 13:30 必返,15:00 后易堵</div>
+    </div>
+    <span class="route-arrow">→</span>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">⛽</span>服务区/中转</div>
+    <div class="poi" style="opacity:0.7;">
+      <div class="poi-name">京昆高速服务区
+        <span class="tag service">服务区</span>
+      </div>
+      <div class="poi-info">返京途中 · 11:00 · 约 200km</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=0,0,%E4%BA%AC%E6%98%86%E9%AB%98%E9%80%9F%E6%9C%8D%E5%8A%A1%E5%8C%BA&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E4%BA%AC%E6%98%86%E9%AB%98%E9%80%9F%E6%9C%8D%E5%8A%A1%E5%8C%BA&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🍜</span>餐厅</div>
+    <div class="poi" style="opacity:0.7;">
+      <div class="poi-name">石家庄午餐
+        <span class="tag food">餐厅</span>
+      </div>
+      <div class="poi-info">京昆高速石家庄段 · 13:00</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=0,0,%E7%9F%B3%E5%AE%B6%E5%BA%84%E5%8D%88%E9%A4%90&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E7%9F%B3%E5%AE%B6%E5%BA%84%E5%8D%88%E9%A4%90&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-title"><span class="emoji">🏠</span>返程</div>
+    <div class="poi">
+      <div class="poi-name">顺义枫泉花园
+        <span class="tag end">回程</span>
+      </div>
+      <div class="poi-info">抵京 · 17:00 · 全程约 720km</div>
+      <div class="poi-actions">
+    <a class="btn-nav" target="_blank" href="https://uri.amap.com/navigation?to=116.659905,40.129109,%E9%A1%BA%E4%B9%89%E6%9E%AB%E6%B3%89%E8%8A%B1%E5%9B%AD&mode=car&src=wutaishan-trial">🚗 导航</a>
+    <a class="btn-marker" target="_blank" href="https://uri.amap.com/marker?markers=116.659905,40.129109,%E9%A1%BA%E4%B9%89%E6%9E%AB%E6%B3%89%E8%8A%B1%E5%9B%AD&src=wutaishan-trial">📍 标记位置</a>
+    <a class="btn-search" target="_blank" href="https://uri.amap.com/search?keyword=%E9%A1%BA%E4%B9%89%E6%9E%AB%E6%B3%89%E8%8A%B1%E5%9B%AD&src=wutaishan-trial">🔍 搜索</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ========== 使用说明 ========== -->
+<section class="usage">
+  <h3>📱 使用说明</h3>
+  <ol>
+    <li><b>🚗 导航</b> · 所有点位都有 · 高德自动 fallback name 搜索定位</li>
+    <li><b>🔍 搜索</b> · 所有点位都有 · 查同名 POI / 收藏 / 二次确认</li>
+    <li><b>📍 标记位置</b> · 仅坐标精准的点有 · 地图上精准标点</li>
+    <li>手机点按钮会唤起高德 App；未装则跳网页版</li>
+  </ol>
+  <div class="tip">
+    💡 <b>坐标质量提示</b> · 半透明的卡片为 fallback 坐标,真实出行前建议用 web_search 校核到 known 级别
+  </div>
+</section>
+
+<button class="to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const navLinks = document.querySelectorAll('.day-nav a');
+const sections = document.querySelectorAll('.day');
+
+navLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    navLinks.forEach(l => l.classList.remove('active'));
+    e.target.classList.add('active');
+  });
+});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-30% 0px -50% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
