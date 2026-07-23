@@ -379,12 +379,11 @@ trip-plan/
 │   ├── osrm-routing.md
 │   ├── github-pages-deploy.md
 │   └── artifact-checklist.md
-├── destinations/                     # ★ 目的地 playbook(LLM 读这个)
+├── destinations/                     # ★ 目的地 playbook(LLM 读这个,按需添加)
 │   ├── README.md
 │   ├── registry.json
-│   ├── wutaishan.md
-│   └── lhasa.md
-├── scripts/                          # LLM 工具(7 个)
+│   └── wutaishan.md
+├── scripts/                          # LLM 工具(8 个)
 │   ├── parse_input.py                # ★ 输入适配器
 │   ├── gcj02_wgs84.py                # 坐标互转
 │   ├── osrm_route.py                 # OSRM 路径
