@@ -272,11 +272,10 @@ git push origin main
 
 ## Playbook 使用
 
-LLM 在被 trip-plan 唤起后,**第一步就读相关目的地 playbook**:
+LLM 在被 trip-plan 唤起后,**先读完本 SKILL.md,再读对应目的地 playbook**(顺序见设计文档 §3.1):
 
 ```python
-read destinations/wutaishan.md  # 五台山行程
-read destinations/lhasa.md      # 拉萨行程
+read destinations/<slug>.md     # 对应目的地知识:分组规则 + 必去点 + 专属提醒
 ```
 
 Playbook 结构 + 注册方法见 `destinations/README.md`。
