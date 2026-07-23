@@ -352,7 +352,7 @@ git push origin main
 
 > 实际渲染走 CSS class(如 `.tag.attract`),hex 颜色是规划参考,模板渲染时映射。
 
-POI 用 7 类基础 tag + 2 类扩展 tag:
+POI 用 7 类 tag:
 
 | tag | 含义 | 颜色 |
 |---|---|---|
@@ -363,8 +363,6 @@ POI 用 7 类基础 tag + 2 类扩展 tag:
 | `food` | 餐厅 | `#FFB300` 黄 |
 | `service` | 服务区 | `#1976D2` 蓝 |
 | `stop` | 驿站 / 中转 | `#00838F` 青 |
-| `peak` | 山顶 / 制高点(扩展) | `#f57f17` |
-| `optional` | 可选 / 收尾(扩展) | `#0891b2` |
 
 ### 3.6.2 坐标精度分级
 

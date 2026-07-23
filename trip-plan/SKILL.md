@@ -311,7 +311,7 @@ cd ~/blog && git add . && git commit -m "feat(trip-map): <目的地>" && git pus
 
 ### 标签体系
 
-POI 用 7 类 tag(基础)+ 2 类扩展:
+POI 用 7 类 tag:
 
 | tag | 含义 | 颜色 |
 |---|---|---|
@@ -322,8 +322,6 @@ POI 用 7 类 tag(基础)+ 2 类扩展:
 | `food` | 餐厅 | `#FFB300` 黄 |
 | `service` | 服务区 | `#1976D2` 蓝 |
 | `stop` | 驿站 / 中转 | `#00838F` 青 |
-| `peak` | 山顶 / 制高点(扩展) | `#f57f17` |
-| `optional` | 可选 / 收尾(扩展) | `#0891b2` |
 
 ### 坐标精度分级
 
@@ -361,7 +359,6 @@ POI 用 7 类 tag(基础)+ 2 类扩展:
 trip-plan/
 ├── SKILL.md                          # 本文件(LLM 推理操作手册)
 ├── assets/                           # 模板
-│   ├── nav-template.html
 │   ├── overview-map-template.html
 │   ├── guide-template.md
 │   ├── trip.kml.template.xml
