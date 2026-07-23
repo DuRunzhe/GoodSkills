@@ -252,15 +252,16 @@ git push origin main
 
 | 工具 | 调用 | 用在 |
 |---|---|---|
-| `parse_input.py` | `python3 scripts/parse_input.py <input> -o pois.json` | Step 1 反推结构化 |
+| `parse_input.py` | `python3 scripts/parse_input.py <input> -o pois.json [--form auto\|html\|md\|csv\|json\|text] [--validate]` | Step 1 反推结构化 |
 | `web_search` | OpenClaw 平台工具 | Step 2 检索 |
 | `wechat_spander` | 通过 skill 调用 | Step 2 抓公众号 |
 | `gcj02_wgs84.py` | `python3 scripts/gcj02_wgs84.py pois.json pois.json --mode to_wgs84` | Step 3 坐标互转 |
+| `osrm_route.py` | `python3 scripts/osrm_route.py pois.json -o routes.json` | Step 5 OSRM 路径(由 gen_trip_artifacts.py 自动调) |
+| `assign_day_colors.py` | `python3 scripts/assign_day_colors.py <N>` | Step 5 Day 颜色分配(由 gen_trip_artifacts.py 自动调) |
 | `validate.py` | `python3 scripts/validate.py pois.json --strict` | Step 3 / Step 5 校验 |
-| `optimize_route.py` | `python3 scripts/optimize_route.py pois.json` | Step 3 TSP(可选) |
 | `gen_trip_nav.py` | `python3 scripts/gen_trip_nav.py pois.json -o nav.html` | Step 5 渲染导航页 |
-| `gen_trip_artifacts.py` | `python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG` | Step 5 渲染综合地图+KML |
-| `screenshot_html.py` | `python3 scripts/screenshot_html.py <html>` | Step 5 截图 |
+| `gen_trip_artifacts.py` | `python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG [--no-osrm] [--no-validate]` | Step 5 渲染综合地图+KML |
+| `screenshot_html.py` | `python3 scripts/screenshot_html.py <html> [--batch] [--days D1,D2,...] [-o PNG] [--mode route\|straight]` | Step 5 截图 |
 
 ## Playbook 使用
 
