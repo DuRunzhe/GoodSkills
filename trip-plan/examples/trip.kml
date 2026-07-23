@@ -91,6 +91,11 @@
   </Folder>
 
   <!-- ========== Day 2 ========== -->
+  <!--
+    POI 顺序对齐 pois.json D2 idx: 1.酒店 A → 2.景点 B → 3.餐厅 A
+    修复前 KML D2 有 4 个 Placemark（含一个冗余"景点 A"占位 POI）,
+    修复后按真实数据 3 个 POI,LineString 坐标顺序也按 idx 走。
+  -->
   <Folder>
     <name>D2 景点 A → 景点 B</name>
     <description>80km · 3h · 示例主题</description>
@@ -102,46 +107,31 @@
         <tessellate>1</tessellate>
         <coordinates>
           116.500000,40.500000,0
-          116.800000,40.700000,0
           117.000000,41.000000,0
+          116.800000,40.700000,0
         </coordinates>
       </LineString>
     </Placemark>
 
     <Placemark>
-      <name>1. 景点 A</name>
+      <name>1. 酒店 A</name>
       <description><![CDATA[
-示例景点 · 8:30 出发
+示例酒店 · 入住 18:00
 <br/><br/>
-标签: attract
+标签: hotel
 <br/>
 坐标(GCJ-02): 116.500000, 40.500000
 <br/>
-高德导航: <a href="https://uri.amap.com/navigation?to=116.500000,40.500000,景点%20A&mode=car&src=yourtag">点这里导航</a>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.500000,40.500000,酒店%20A&mode=car&src=yourtag">点这里导航</a>
       ]]></description>
-      <Style><IconStyle><color>ffFF6F00</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Style><IconStyle><color>ff7B1FA2</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
       <Point><coordinates>116.500000,40.500000,0</coordinates></Point>
     </Placemark>
 
     <Placemark>
-      <name>2. 餐厅 A</name>
+      <name>2. 景点 B</name>
       <description><![CDATA[
-示例餐厅 · 12:30 午餐
-<br/><br/>
-标签: food
-<br/>
-坐标(GCJ-02): 116.800000, 40.700000
-<br/>
-高德导航: <a href="https://uri.amap.com/navigation?to=116.800000,40.700000,餐厅%20A&mode=car&src=yourtag">点这里导航</a>
-      ]]></description>
-      <Style><IconStyle><color>ffFFB300</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
-      <Point><coordinates>116.800000,40.700000,0</coordinates></Point>
-    </Placemark>
-
-    <Placemark>
-      <name>3. 景点 B</name>
-      <description><![CDATA[
-示例景点 · 11:00 抵达 · 游玩 2h
+示例景点 · 8:30 出发 · 2h 游玩
 <br/><br/>
 标签: attract
 <br/>
@@ -154,18 +144,18 @@
     </Placemark>
 
     <Placemark>
-      <name>4. 酒店 A</name>
+      <name>3. 餐厅 A</name>
       <description><![CDATA[
-示例酒店 · 18:00 入住
+示例餐厅 · 12:30 午餐
 <br/><br/>
-标签: hotel
+标签: food
 <br/>
-坐标(GCJ-02): 116.500000, 40.500000
+坐标(GCJ-02): 116.800000, 40.700000
 <br/>
-高德导航: <a href="https://uri.amap.com/navigation?to=116.500000,40.500000,酒店%20A&mode=car&src=yourtag">点这里导航</a>
+高德导航: <a href="https://uri.amap.com/navigation?to=116.800000,40.700000,餐厅%20A&mode=car&src=yourtag">点这里导航</a>
       ]]></description>
-      <Style><IconStyle><color>ff7B1FA2</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
-      <Point><coordinates>116.500000,40.500000,0</coordinates></Point>
+      <Style><IconStyle><color>ffFFB300</color><scale>1.0</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle></Style>
+      <Point><coordinates>116.800000,40.700000,0</coordinates></Point>
     </Placemark>
   </Folder>
 

@@ -59,7 +59,7 @@ header h1{font-size:17px;margin:0 0 3px;}header p{font-size:11px;opacity:.95;mar
 <script>
 const pois = [{"day":"D1","idx":1,"name":"起点","tag":"start","info":"示例起点 · 早上 8:00 出发","lng_gcj02":116.0,"lat_gcj02":40.0,"lng_wgs84":115.995,"lat_wgs84":39.9956,"coord_source":"original"},{"day":"D1","idx":2,"name":"服务区 A","tag":"service","info":"示例服务区 · 10:00 第一次休整","lng_gcj02":116.2,"lat_gcj02":40.2,"lng_wgs84":116.195,"lat_wgs84":40.1956,"coord_source":"fallback"},{"day":"D1","idx":3,"name":"景点 A","tag":"attract","info":"示例景点 · 12:30 抵达 · 游玩 2h","lng_gcj02":116.5,"lat_gcj02":40.5,"lng_wgs84":116.4948,"lat_wgs84":40.4952,"coord_source":"known"},{"day":"D2","idx":1,"name":"酒店 A","tag":"hotel","info":"示例酒店 · 入住 18:00","lng_gcj02":116.5,"lat_gcj02":40.5,"lng_wgs84":116.4948,"lat_wgs84":40.4952,"coord_source":"known"},{"day":"D2","idx":2,"name":"景点 B","tag":"attract","info":"示例景点 · 8:30 出发 · 2h 游玩","lng_gcj02":117.0,"lat_gcj02":41.0,"lng_wgs84":116.9946,"lat_wgs84":40.9948,"coord_source":"known"},{"day":"D2","idx":3,"name":"餐厅 A","tag":"food","info":"示例餐厅 · 12:30 午餐","lng_gcj02":116.8,"lat_gcj02":40.7,"lng_wgs84":116.7947,"lat_wgs84":40.6949,"coord_source":"fallback"},{"day":"D3","idx":1,"name":"景点 C","tag":"attract","info":"示例景点 · 9:00 出发 · 半日游","lng_gcj02":116.2,"lat_gcj02":40.3,"lng_wgs84":116.195,"lat_wgs84":40.2956,"coord_source":"known"},{"day":"D3","idx":2,"name":"服务区 B","tag":"service","info":"示例服务区 · 14:00 返程休整","lng_gcj02":116.1,"lat_gcj02":40.1,"lng_wgs84":116.095,"lat_wgs84":40.0956,"coord_source":"fallback"},{"day":"D3","idx":3,"name":"终点","tag":"end","info":"示例终点 · 17:00 抵达","lng_gcj02":116.0,"lat_gcj02":40.0,"lng_wgs84":115.995,"lat_wgs84":39.9956,"coord_source":"original"}];
 const dayRoutes = {"D1":[[115.995,39.9956],[116.2,40.1500],[116.4,40.3500],[116.4948,40.4952]],"D2":[[116.4948,40.4952],[116.7,40.7500],[116.9,40.9000],[116.9946,40.9948]],"D3":[[116.9946,40.9948],[116.5,40.6000],[116.3,40.4000],[116.195,40.2956],[116.05,40.1500],[115.995,39.9956]]};
-const specialRoutes = [{"label":"示例景观公路","color":"#FF6F00","weight":6,"waypoints":[[116.4948,40.4952],[116.65,40.7],[116.75,40.85],[116.9,40.95],[116.9946,40.9948]]}];
+const specialRoutes = [{"label":"示例景观公路","day":"D2","color":"#FF6F00","weight":6,"waypoints":[[116.4948,40.4952],[116.65,40.7],[116.75,40.85],[116.9,40.95],[116.9946,40.9948]]}];
 const days = {"D1":"示例起点 → 景点 A","D2":"景点 A → 景点 B","D3":"景点 B → 终点"};
 const dayColors = {"D1":"#E53935","D2":"#1E88E5","D3":"#43A047"};
 const tagColors = {"start":"#00C853","end":"#D50000","attract":"#FF6F00","hotel":"#7B1FA2","food":"#FFB300","service":"#1976D2","stop":"#00838F"};
@@ -123,15 +123,15 @@ function render() {
       allBounds.push([p.lat_wgs84, p.lng_wgs84]);
     });
   });
-  if (currentDay === 'all' || currentDay === 'D2') {
-    specialRoutes.forEach(function(route) {
-      if (!route.waypoints || route.waypoints.length < 2) return;
-      const latlngs = route.waypoints.map(function(c) { return [c[1], c[0]]; });
-      L.polyline(latlngs, {
-        color: route.color || '#FF6F00', weight: route.weight || 6, opacity: 0.9
-      }).addTo(specialLayer).bindPopup(route.label || '特殊路线');
-    });
-  }
+  specialRoutes.forEach(function(route) {
+    // 过滤:每条特殊路线有可选的 day 字段;不设则 'all' 才显示
+    if (currentDay !== 'all' && route.day && currentDay !== route.day) return;
+    if (!route.waypoints || route.waypoints.length < 2) return;
+    const latlngs = route.waypoints.map(function(c) { return [c[1], c[0]]; });
+    L.polyline(latlngs, {
+      color: route.color || '#FF6F00', weight: route.weight || 6, opacity: 0.9
+    }).addTo(specialLayer).bindPopup(route.label || '特殊路线');
+  });
   if (allBounds.length > 0) map.fitBounds(allBounds, {padding: [50, 50]});
 }
 
