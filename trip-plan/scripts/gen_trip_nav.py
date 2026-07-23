@@ -60,6 +60,10 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
     has_coord = lng != 0.0 or lat != 0.0
     coord_source = poi.get('coord_source', 'fallback')
 
+    # 真实坐标判定:坐标非零 + 非 fallback 来源
+    # fallback POI 走 2 按钮(to=0,0 触发高德自动纠错 + 半透明)
+    has_coord = (lng != 0.0 or lat != 0.0) and coord_source != 'fallback'
+
     # 按钮 HTML
     actions = []
     if has_coord:
