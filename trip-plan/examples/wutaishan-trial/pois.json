@@ -1,0 +1,219 @@
+{
+  "_comment": "五台山 3 天试运行数据 · WGS-84 + GCJ-02 双坐标系 · 含 4 个 fallback POI 验证兜底路径",
+  "_schema_ref": "../assets/pois.schema.json",
+  "metadata": {
+    "title": "五台山 3 天古建深度(佛光寺+南禅寺朝圣)",
+    "route_summary": "北京 → 保定 → 忻州 → 五台山 → 佛光寺 → 南禅寺 → 北京",
+    "trip_slug": "wutaishan-trial"
+  },
+  "pois": [
+    {
+      "day": "D1",
+      "idx": 1,
+      "tag": "start",
+      "name": "顺义枫泉花园",
+      "info": "北京顺义出发 · 7:00 走京昆高速",
+      "lng_wgs84": 116.654,
+      "lat_wgs84": 40.128,
+      "lng_gcj02": 116.659905,
+      "lat_gcj02": 40.129109,
+      "coord_source": "original"
+    },
+    {
+      "day": "D1",
+      "idx": 2,
+      "tag": "service",
+      "name": "保定服务区",
+      "info": "京昆高速中段休整 · 9:30 · 约 130km",
+      "lng_wgs84": 115.5,
+      "lat_wgs84": 38.85,
+      "lng_gcj02": 115.506183,
+      "lat_gcj02": 38.850787,
+      "coord_source": "known"
+    },
+    {
+      "day": "D1",
+      "idx": 3,
+      "tag": "attract",
+      "name": "五爷庙",
+      "info": "求财最灵 · 香火最旺 · D1 下午首站",
+      "lng_wgs84": 113.5935,
+      "lat_wgs84": 39.0825,
+      "lng_gcj02": 113.600038,
+      "lat_gcj02": 39.083199,
+      "coord_source": "known"
+    },
+    {
+      "day": "D1",
+      "idx": 4,
+      "tag": "attract",
+      "name": "显通寺",
+      "info": "五大禅处之首 · 青铜殿 + 铜塔 + 无量殿(国内唯一青铜建筑群)",
+      "lng_wgs84": 113.594,
+      "lat_wgs84": 39.081,
+      "lng_gcj02": 113.600537,
+      "lat_gcj02": 39.081698,
+      "coord_source": "known"
+    },
+    {
+      "day": "D1",
+      "idx": 5,
+      "tag": "attract",
+      "name": "塔院寺",
+      "info": "五台山标志性大白塔 · 转塔祈福",
+      "lng_wgs84": 113.5945,
+      "lat_wgs84": 39.0825,
+      "lng_gcj02": 113.601037,
+      "lat_gcj02": 39.083199,
+      "coord_source": "known"
+    },
+    {
+      "day": "D1",
+      "idx": 6,
+      "tag": "food",
+      "name": "素斋晚餐",
+      "info": "寿宁寺 / 普化寺素斋 · 17:30 时段",
+      "lng_wgs84": 113.593,
+      "lat_wgs84": 39.0805,
+      "lng_gcj02": 113.599538,
+      "lat_gcj02": 39.081198,
+      "coord_source": "fallback"
+    },
+    {
+      "day": "D1",
+      "idx": 7,
+      "tag": "hotel",
+      "name": "台怀镇民宿",
+      "info": "台内民宿 · 21:00 入住",
+      "lng_wgs84": 113.595,
+      "lat_wgs84": 39.082,
+      "lng_gcj02": 113.601537,
+      "lat_gcj02": 39.082698,
+      "coord_source": "known"
+    },
+    {
+      "day": "D2",
+      "idx": 1,
+      "tag": "attract",
+      "name": "佛光寺",
+      "info": "国宝中的国宝 · 东大殿(唐) · 文殊殿(金) · 祖师塔(北魏)",
+      "lng_wgs84": 113.316,
+      "lat_wgs84": 39.0445,
+      "lng_gcj02": 113.322916,
+      "lat_gcj02": 39.045425,
+      "coord_source": "known"
+    },
+    {
+      "day": "D2",
+      "idx": 2,
+      "tag": "attract",
+      "name": "南禅寺",
+      "info": "亚洲现存最古木构(782 年) · 17 尊唐代塑像 · 佛光寺南 5km",
+      "lng_wgs84": 113.269,
+      "lat_wgs84": 39.022,
+      "lng_gcj02": 113.275826,
+      "lat_gcj02": 39.022846,
+      "coord_source": "known"
+    },
+    {
+      "day": "D2",
+      "idx": 3,
+      "tag": "food",
+      "name": "台怀镇午餐",
+      "info": "返台怀镇午餐 · 12:00 · 蒙汉兼容餐厅",
+      "lng_wgs84": 113.594,
+      "lat_wgs84": 39.082,
+      "lng_gcj02": 113.600538,
+      "lat_gcj02": 39.082699,
+      "coord_source": "fallback"
+    },
+    {
+      "day": "D2",
+      "idx": 4,
+      "tag": "attract",
+      "name": "殊像寺",
+      "info": "文殊菩萨最大铜像(5 层楼高) · 壮观",
+      "lng_wgs84": 113.5905,
+      "lat_wgs84": 39.079,
+      "lng_gcj02": 113.59704,
+      "lat_gcj02": 39.079698,
+      "coord_source": "known"
+    },
+    {
+      "day": "D2",
+      "idx": 5,
+      "tag": "attract",
+      "name": "菩萨顶",
+      "info": "康熙乾隆行宫 · 108 级台阶 · 红墙黄瓦",
+      "lng_wgs84": 113.599,
+      "lat_wgs84": 39.0875,
+      "lng_gcj02": 113.605536,
+      "lat_gcj02": 39.088202,
+      "coord_source": "known"
+    },
+    {
+      "day": "D2",
+      "idx": 6,
+      "tag": "hotel",
+      "name": "台怀镇民宿",
+      "info": "续住 D1 民宿 · 21:00",
+      "lng_wgs84": 113.595,
+      "lat_wgs84": 39.082,
+      "lng_gcj02": 113.601537,
+      "lat_gcj02": 39.082698,
+      "coord_source": "known"
+    },
+    {
+      "day": "D3",
+      "idx": 1,
+      "tag": "service",
+      "name": "京昆高速服务区",
+      "info": "返京途中 · 11:00 · 约 200km",
+      "lng_wgs84": 113.3,
+      "lat_wgs84": 38.4,
+      "lng_gcj02": 113.306797,
+      "lat_gcj02": 38.40064,
+      "coord_source": "fallback"
+    },
+    {
+      "day": "D3",
+      "idx": 2,
+      "tag": "food",
+      "name": "石家庄午餐",
+      "info": "京昆高速石家庄段 · 13:00",
+      "lng_wgs84": 114.51,
+      "lat_wgs84": 38.04,
+      "lng_gcj02": 114.515993,
+      "lat_gcj02": 38.040634,
+      "coord_source": "fallback"
+    },
+    {
+      "day": "D3",
+      "idx": 3,
+      "tag": "end",
+      "name": "顺义枫泉花园",
+      "info": "抵京 · 17:00 · 全程约 720km",
+      "lng_wgs84": 116.654,
+      "lat_wgs84": 40.128,
+      "lng_gcj02": 116.659905,
+      "lat_gcj02": 40.129109,
+      "coord_source": "original"
+    }
+  ],
+  "days_summary": {
+    "D1": {
+      "title": "北京 → 五台山(台怀镇)",
+      "desc": "约 360km · 5h · 五爷庙+显通寺+塔院寺"
+    },
+    "D2": {
+      "title": "佛光寺 + 南禅寺 + 台怀镇核心",
+      "desc": "约 80km · 12h · 国宝中的国宝"
+    },
+    "D3": {
+      "title": "返京",
+      "desc": "约 360km · 5h · 13:30 必返,15:00 后易堵"
+    }
+  },
+  "day_routes_wgs84": {},
+  "special_routes_wgs84": []
+}
