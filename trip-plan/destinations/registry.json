@@ -11,15 +11,6 @@
       "maturity": "stable",
       "last_verified": "2026-07-23",
       "tags": ["古建筑", "佛教", "梁思成朝圣", "自驾"]
-    },
-    "lhasa": {
-      "name": "拉萨",
-      "region": "西藏自治区拉萨市",
-      "type": "高原 + 藏传佛教",
-      "playbook": "destinations/lhasa.md",
-      "maturity": "draft",
-      "last_verified": null,
-      "tags": ["高原", "藏传佛教", "布达拉宫", "边防证"]
     }
   }
 }

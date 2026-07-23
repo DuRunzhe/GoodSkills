@@ -346,15 +346,18 @@ templates/
 | 底部专属提醒 | Phase 4 LLM + 模板 | trip_content.md + destinations/*.md |
 | 时段编排 | 规则引擎 | scripts/rule_engine.py |
 
-**质量门(部署前必过)**:
+**质量门(部署前必过,完整 10 项)**:
 
 - [ ] 所有 POI 有有效坐标(`coord_source != fallback` 或已标注核实)
 - [ ] 所有链接可达(高德 / 官网 / 预约电话)
 - [ ] 移动端预览通过(截图自检)
-- [ ] 至少 1 处 LLM 文案质量自检(无幻觉 / 无重复)
+- [ ] LLM 文案无幻觉 / 无重复(关键事实标源)
 - [ ] 路线几何完整(D1 / D2 都有 OSRM 路径)
-- [ ] 必去点全部出现
-- [ ] 时段无冲突
+- [ ] 必去点全部出现(对照 destinations/<slug>.md 的"必去点")
+- [ ] 时段无冲突(用餐 / 开放时间)
+- [ ] 目的地专属提醒完整(从 playbook 抽取 ≥ 3 项)
+- [ ] 长文 ≤ 3000 字,POI 描述 ≤ 100 字
+- [ ] 攻略长文 + 导航页 + 综合地图 + JSON + KML 全部产出
 
 **LLM 在这一步做什么**:
 1. 把前面所有信息(POI 数据 + 文案)组织成结构化输入
@@ -369,13 +372,51 @@ templates/
 - ❌ 自己写 HTML(让 gen_trip_*.py 写,LLM 只提供数据)
 - ❌ 自己跑服务器(用 GitHub Pages 静态部署)
 
+## 4.6 数据约定(LLM 在 Step 1-5 必须遵守)
+
+### 4.6.1 标签体系
+
+POI 用 7 类基础 tag + 2 类扩展 tag:
+
+| tag | 含义 | 颜色 |
+|---|---|---|
+| `start` | 起点 | `#00C853` 绿 |
+| `end` | 终点 | `#D50000` 红 |
+| `attract` | 景点 | `#FF6F00` 橙 |
+| `hotel` | 酒店 | `#7B1FA2` 紫 |
+| `food` | 餐厅 | `#FFB300` 黄 |
+| `service` | 服务区 | `#1976D2` 蓝 |
+| `stop` | 驿站 / 中转 | `#00838F` 青 |
+| `peak` | 山顶 / 制高点(扩展) | `#f57f17` |
+| `optional` | 可选 / 收尾(扩展) | `#0891b2` |
+
+### 4.6.2 坐标精度分级
+
+| 来源 | 含义 | 透明度 |
+|---|---|---|
+| `original` | 原文自带精确坐标 | 实色 |
+| `known` | 公开资料常用坐标 | 实色 |
+| `fallback` | city 中心 + 抖动 / 缺失 | 半透明 0.7 |
+
+**真实出行前**应把 fallback 全部用 web_search 校核到 known 级别。
+
+### 4.6.3 输入形式(自动识别)
+
+| 形式 | 识别 | 抽取精度 |
+|---|---|---|
+| HTML 导航页 | `<div class="poi">` | ★★★★★ |
+| Markdown 文章 | `.md` / `.markdown` | ★★★ |
+| CSV 表 | `.csv` | ★★★★ |
+| JSON | `.json` + pois 字段 | ★★★★★ |
+| 自由文本 | 其他 | ★★(需 LLM 抽 CSV 中转) |
+
 ---
 
 ## 5. 目的地知识库(playbook)
 
 **目标**:把本地化知识(五台山限行/拉萨高反)沉淀成可复用资产。
 
-**结构**:`destinations/<slug>.md` + `destinations/<slug>.json`
+**结构**:`destinations/<slug>.md`(以实际为准,当前只有 .md,无 .json)
 
 ```yaml
 # destinations/wutaishan.md
@@ -430,7 +471,7 @@ season: 夏季最佳(6-9月)
 
 ## 6. 实施路线图(skill 内部能力升级)
 
-### Phase A(本周)· 把 SKILL.md 写厚,把 playbook 写多
+### Phase A(已完成)· 写厚 SKILL.md + 一个示例 playbook
 
 **目标**:让 LLM 读 SKILL.md + playbook 后就能独立产出生产级产物,不依赖新增脚本。
 
@@ -438,10 +479,8 @@ season: 夏季最佳(6-9月)
 |---|---|---|
 | A.1 重写 SKILL.md:加完整的「5 步推理指引」+ 「工具调用清单」+ 「规则引擎自检清单」 | 2d | SKILL.md v2(估计 300-400 行) |
 | A.2 写 destinations/wutaishan.md(playbook v1) | 0.5d | 五台山 playbook |
-| A.3 写 destinations/lhasa.md | 0.5d | 拉萨 playbook |
-| A.4 跑通一次实跑(五台山),记录哪些环节 LLM 处理得不够好 | 0.5d | 改进清单 |
 
-**验收**:用 SKILL.md v2 + 五台山 playbook 实跑一次,产物对比 v1,分组精度、专属提醒、路线合理性显著提升。
+**验收**:SKILL.md v2 + 五台山 playbook 完成。LLM 读这两份文档后,能独立产出符合 §4.6 数据约定 + §4.5 质量门(完整 10 项)的生产级产物。
 
 ### Phase B(本月)· 加少量工具脚本(LLM 做不好的事)
 
@@ -529,7 +568,7 @@ season: 夏季最佳(6-9月)
 | 时段冲突率 | 0% |
 | 专属提醒完整度 | ≥ 5 项/目的地 |
 | 主人实际出行使用率 | ≥ 80%(「产出了真用」) |
-| Playbook 数量 | ≥ 5 个稳定版 |
+| Playbook 数量 | 按需添加(不属 skill 必做流程,属路线图快照) |
 | 行程算法可处理 POI 数 | ≥ 50 |
 
 ---
