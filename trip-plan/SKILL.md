@@ -261,7 +261,7 @@ git push origin main
 | `validate.py` | `python3 scripts/validate.py pois.json --strict` | Step 3 / Step 5 校验 |
 | `gen_trip_nav.py` | `python3 scripts/gen_trip_nav.py pois.json -o nav.html` | Step 5 渲染导航页 |
 | `gen_trip_artifacts.py` | `python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG [--no-osrm] [--no-validate]` | Step 5 渲染综合地图+KML |
-| `screenshot_html.py` | `python3 scripts/screenshot_html.py <html> [--batch] [--days D1,D2,...] [-o PNG] [--mode route\|straight]` | Step 5 截图 |
+| `screenshot_html.py` | `python3 scripts/screenshot_html.py <html> [--batch] [--days D1,D2,...] [-o PNG] [--mode route\|straight] [--width N] [--height N] [--scale N] [--wait N]` | Step 5 截图 |
 
 ## Playbook 使用
 

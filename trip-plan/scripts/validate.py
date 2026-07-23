@@ -5,8 +5,7 @@ trip-plan 产物校验工具
 校验 pois.json 格式 + 各产物的内部一致性。
 
 用法:
-  python validate.py pois.json
-  python validate.py pois.json --schema pois.schema.json --strict
+  python validate.py pois.json [--strict]
 """
 import json
 import re

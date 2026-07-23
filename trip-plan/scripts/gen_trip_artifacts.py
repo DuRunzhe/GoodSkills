@@ -33,50 +33,6 @@ from gen_trip_nav import gen_trip_nav as _gen_trip_nav
 TEMPLATE_DIR = SCRIPT_DIR.parent / 'assets'
 
 
-# ============== 1. 导航点位页 ==============
-def gen_trip_nav(data, output_path, amap_src='yourtag'):
-    pois = sorted(data['pois'], key=lambda p: (p['day'], p.get('idx', 0)))
-    days = sorted(set(p['day'] for p in pois))
-    day_titles = {p['day']: data.get('days_summary', {}).get(p['day'], {}).get('title', p['day'])
-                  for p in pois}
-
-    # 按 day 分组,每个 day 内按 idx 顺序
-    day_groups = {}
-    for p in pois:
-        day_groups.setdefault(p['day'], []).append(p)
-
-    tag_labels = {
-        'start': '起点', 'end': '终点',
-        'attract': '景点', 'hotel': '酒店', 'food': '餐厅',
-        'service': '服务区', 'stop': '驿站'
-    }
-
-    # 生成 HTML
-    html = TEMPLATE_DIR.joinpath('nav-template.html').read_text(encoding='utf-8')
-
-    # 简单替换标题
-    trip_title = data.get('metadata', {}).get('title', '示例行程')
-    html = html.replace('{trip_title}', trip_title)
-
-    # 生成 day-nav
-    day_nav = '\n'.join(
-        f'  <a href="#day{i}">D{i} {day_titles.get("D"+str(i), "")[:20]}</a>'
-        for i in range(1, len(days) + 1)
-    )
-    # 替换 day-nav 块(简化:用整个 day-nav 重写)
-    html = re.sub(
-        r'(<nav class="day-nav"[^>]*>).*?(</nav>)',
-        f'\\1\n{day_nav}\n\\2',
-        html, count=1, flags=re.DOTALL
-    )
-
-    # 生成每个 Day section(简化版,直接生成 1 个示例 Day 1)
-    # 实际用模板要复杂,这里只生成 demo Day 1 + 注释
-    # 用户应该根据数据自己写 day section,或扩展此函数
-    Path(output_path).write_text(html, encoding='utf-8')
-    print(f'  nav: {output_path} (template,需手动填充 Day section)')
-
-
 # ============== 2. OSRM 综合地图 ==============
 def gen_overview_map(data, output_path, amap_src='yourtag', use_osrm=True):
     pois = data['pois']
