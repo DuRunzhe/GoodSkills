@@ -8,8 +8,7 @@ LLM 在被 trip-plan skill 唤起后,**第一步就应该读相关的 destinatio
 destinations/
 ├── README.md           # 本文件
 ├── registry.json       # 目的地注册表(LLM 找 playbook 的入口)
-├── wutaishan.md        # 五台山(稳定版)
-└── lhasa.md            # 拉萨(草案)
+└── wutaishan.md        # 五台山(稳定版)
 ```
 
 ## 注册一个目的地

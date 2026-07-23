@@ -401,6 +401,8 @@ name: 五台山
 region: 山西省忻州市
 type: 古建筑 + 佛教文化
 season: 夏季最佳(6-9月)
+maturity: stable
+last_verified: 2026-07-23
 
 分组规则:
   - { title: "🏁 出发", pattern: "tag=start" }
