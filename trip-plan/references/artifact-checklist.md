@@ -52,6 +52,10 @@
 
 ### 可选
 
+- 🖼 **POI 路线预览截图**：每张 POI 卡片嵌入可折叠的高德路线截图(显示距离/时长/通行费)
+  - 截图路径记录在 `route_screenshots` 数据中
+  - 点击「📍 导航路线」标签展开/收起
+  - 截图来自 `screenshot_html.py --mode batch-gaode-routes`
 - day-nav 当前 active 高亮(JS 监听 scroll)
 - 搜索框(快速定位 POI)
 

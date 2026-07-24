@@ -10,9 +10,38 @@ trip-plan 导航点位页生成器(完整实现)
 - 自定义 src(utm 标记)
 """
 import json
+import math
 import urllib.parse
 from pathlib import Path
 from collections import defaultdict
+
+
+# ============================================================
+# 路线距离/时长/通行费计算（Haversine + 高速估算）
+# ============================================================
+
+def _haversine_km(lng1, lat1, lng2, lat2):
+    """Haversine 公式计算两点间直线距离(km)"""
+    R = 6371.0  # 地球半径 km
+    dlat = math.radians(lat2 - lat1)
+    dlng = math.radians(lng2 - lng1)
+    a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+def calc_route_estimate(lng1, lat1, lng2, lat2):
+    """估算自驾路线（高速优先）的里程/时长/通行费
+
+    使用 Haversine 直线距离 × 1.35 作为高速路线系数
+    时长 = 里程 / 90km/h（高速均速）
+    通行费 = 里程 × ¥0.55/km（全国高速均价）
+    """
+    straight_km = _haversine_km(lng1, lat1, lng2, lat2)
+    highway_km = round(straight_km * 1.35)
+    minutes = round(highway_km / 90 * 60)
+    toll = round(highway_km * 0.55)
+    return highway_km, minutes, toll
 
 
 # 标签分组顺序 + 显示名 + emoji
@@ -48,6 +77,36 @@ TAG_CN = {
 }
 
 
+def _precalc_route_info(day_pois):
+    """为某天所有 POI 计算路线距离/时长/通行费(写入 route_km / route_min / route_toll)
+
+    优先使用高德 API 真实数据(route_km 已存在则跳过 Haversine 估算)
+    """
+    prev = None
+    for p in day_pois:
+        tag = p.get('tag', '')
+        lng = p.get('lng_gcj02', 0.0)
+        lat = p.get('lat_gcj02', 0.0)
+
+        # 如果已有高德 API 数据，只更新 prev 指针，不做计算
+        if p.get('route_km', 0) > 0:
+            prev = p
+            continue
+
+        if tag == 'start' or (lng == 0.0 and lat == 0.0):
+            prev = p
+            continue
+        if prev and lng and lat:
+            plng = prev.get('lng_gcj02', 0.0)
+            plat = prev.get('lat_gcj02', 0.0)
+            if plng and plat and not p.get('route_km', 0):
+                km, mins, toll = calc_route_estimate(plng, plat, lng, lat)
+                p['route_km'] = km
+                p['route_min'] = mins
+                p['route_toll'] = toll
+        prev = p
+
+
 def gen_poi_card(poi: dict, amap_src: str) -> str:
     """生成单个 POI 卡片(2 按钮 or 3 按钮,取决于是否有坐标)"""
     name = poi.get('name', '未命名')
@@ -57,12 +116,27 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
     info = poi.get('info', '')
     lng = poi.get('lng_gcj02', 0.0)
     lat = poi.get('lat_gcj02', 0.0)
-    has_coord = lng != 0.0 or lat != 0.0
     coord_source = poi.get('coord_source', 'fallback')
 
     # 真实坐标判定:坐标非零 + 非 fallback 来源
-    # fallback POI 走 2 按钮(to=0,0 触发高德自动纠错 + 半透明)
     has_coord = (lng != 0.0 or lat != 0.0) and coord_source != 'fallback'
+
+        # 路线信息（导航距离/时长/通行费）
+    route_info_html = ''
+    route_distance = poi.get('route_km', 0)
+    route_duration = poi.get('route_min', 0)
+    route_toll = poi.get('route_toll', 0)
+    if route_distance > 0:
+        duration_str = f'{route_duration // 60}h{route_duration % 60:02d}min' if route_duration >= 60 else f'{route_duration}min'
+        toll_str = f'通行费 ≈ ¥{route_toll}' if route_toll > 0 else ''
+        route_info_html = (
+            f'      <div class="poi-route-info">\n'
+            f'        <span class="ri-dist">🗺️ {route_distance}km</span>\n'
+            f'        <span class="ri-time">⏱️ {duration_str}</span>\n'
+        )
+        if toll_str:
+            route_info_html += f'        <span class="ri-toll">💰 {toll_str}</span>\n'
+        route_info_html += f'      </div>\n'
 
     # 按钮 HTML
     actions = []
@@ -100,6 +174,7 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
         f'        <span class="tag {tag}">{tag_cn}</span>\n'
         f'      </div>\n'
         f'      <div class="poi-info">{info}</div>\n'
+        + route_info_html +
         f'      <div class="poi-actions">\n'
         + ''.join(actions) +
         f'      </div>\n'
@@ -109,6 +184,7 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
 
 def gen_day_section(day_key: str, day_pois: list, data: dict, amap_src: str) -> str:
     """生成单个 Day section(按 tag 自动分组)"""
+    _precalc_route_info(day_pois)
     day_num = int(day_key[1:])  # D1 → 1
     day_summary = data.get('days_summary', {}).get(day_key, {})
     day_title = day_summary.get('title', day_key)
@@ -300,6 +376,27 @@ header p .route {{ font-weight: 600; }}
 }}
 .poi-actions a:active {{ opacity: 0.7; }}
 
+/* ========== 路线信息(导航距离/时长/通行费) ========== */
+.poi-route-info {{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  background: #fffaf0;
+  border-radius: 6px;
+  border: 1px solid #fff0d6;
+  font-size: 12px;
+}}
+.poi-route-info span {{
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}}
+.poi-route-info .ri-dist {{ color: #2563eb; font-weight: 600; }}
+.poi-route-info .ri-time {{ color: #7B1FA2; font-weight: 600; }}
+.poi-route-info .ri-toll {{ color: #c7392b; font-weight: 600; }}
+
 .btn-nav    {{ background: #FF6F00; color: white; }}
 .btn-marker {{ background: #f0f1f3; color: #555; }}
 .btn-search {{ background: #e8eaec; color: #555; }}
@@ -418,6 +515,7 @@ def gen_trip_nav(data: dict, output_path, amap_src='yourtag') -> str:
 
     Args:
         data: pois.json 解析后的 dict(含 pois / days_summary)
+             可选 route_screenshots dict: {"D1_1": {"path": "...", "from": "...", "to": "..."}}
         output_path: 输出 HTML 路径
         amap_src: 高德 utm src 参数
 
