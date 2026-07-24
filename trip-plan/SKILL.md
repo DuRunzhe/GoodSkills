@@ -299,6 +299,61 @@ policy=1=高速优先,2=时间优先,3=距离优先,4=避免拥堵
 | 无截图时回退 | `.poi-route-info` 文字信息条: 🛣️ 213km ⏱️ 2h39min 💰 ¥84 |
 | 截图失败时的兜底 | 纯文本路线信息,不影响导航按钮功能 |
 
+**信息浮窗控制规则**:
+
+截图底部有一个固定定位的信息浮窗（白色背景,圆角 14px,阴影,居中）,显示三段数据:
+
+| 字段 | 样式 | 数据来源 |
+|---|---|---|
+| 🛣️ 导航距离 | 蓝色 `#2563eb`, 22px bold + km 后缀 | `route.distance / 1000` |
+| ⏱️ 预计时长 | 紫色 `#7B1FA2`, 22px bold + min 后缀 | `route.time / 60`, 格式化 `xhxxmin` |
+| 💰 通行费 | 红色 `#c7392b`, 22px bold + ¥ 前缀 | `route.tolls` |
+
+各字段间用 1px 灰色竖线分隔。浮窗完整 CSS:
+```
+position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+z-index:99999;background:white;border-radius:14px;
+padding:16px 24px;box-shadow:0 4px 20px rgba(0,0,0,0.2);
+display:flex;gap:20px;font-family:-apple-system,PingFang SC,sans-serif;align-items:center;
+```
+
+**截图弹窗清理规则**:
+
+截图前必须清理以下 ditu.amap.com 的自动弹出元素,保留搜索面板(起终点/导航方式/路线方案):
+
+| 弹出元素 | 清理方式 |
+|---|---|
+| 新版上线提示 `.new-version-panel` | `document.querySelectorAll(sel).forEach(e=>e.remove())` |
+| 下载APP提示 `.app-download-panel` | 同上 |
+| 全屏遮罩 `.mask--jss` | 同上 |
+| 登录弹窗 `.root--jss` / `.lbs-passport-modal` | 同上 |
+| 其他全屏 fixed 遮罩(>80% 视口宽高) | 遍历 `body > div`,判断 `position=fixed && width/height > 80%` 后移除 |
+
+注意:仅清除遮挡元素,保留左侧搜索面板(起终点输入、驾车/公交/步行模式切换、路线方案列表)。
+
+**网页显示规则**:
+
+导航页面展示地图路线截图时遵循以下分层策略:
+
+| 层级 | 内容 | 图片 | 大小 |
+|---|---|---|---|
+| 默认显示 | POI 卡片内嵌截图 | JPG 800px 宽, Q85 | 22-90KB |
+| 点击放大 | Lightbox 全屏遮罩展示 | PNG 原图 2560×1600 | 155-800KB |
+| 加载失败 | CSS 回退 `.poi-route-info` 文字信息条 | 无图片 | 纯文本 |
+
+显示机制:
+- `<img>` 标签 `src` 指向缩略图, `data-full` 属性存储原图路径
+- Lightbox JS: `lbImg.src = img.dataset.full || img.src` — 有原图则加载原图,无则用缩略图
+- CSS 自适应: `.poi-route-map { width: 100%; border-radius: 10px; cursor: pointer; }`
+- Lightbox 遮罩: `.lightbox-overlay` fixed 全屏 + 黑色半透明 + `max-width: 95vw; max-height: 95vh` 显示原图
+
+**存储规则**:
+
+| 文件 | 用途 | 格式 | 目录 | 保留策略 |
+|---|---|---|---|---|
+| `map-screenshots/{key}.png` | 原图, 2560×1600, 供 lightbox 全屏查看 | PNG 无损 | 博客 `map-screenshots/` | ✅ 必须保留 |
+| `map-thumbs/{key}.jpg` | 缩略图, 800px 宽, 供 POI 卡片默认显示 | JPG Q85 | 博客 `map-thumbs/` | 必须与 nav.html 同目录 |
+
 **批量生成脚本参考（五台山实战验证）**:
 
 Playwright 脚本要点:
@@ -306,7 +361,9 @@ Playwright 脚本要点:
 2. 每条路线用 `page.evaluate(JS, [fromLng, fromLat, fromName, toLng, toLat, toName])` 切换
 3. 每次截图前清除旧路线图层 `window._rl` 和信息条 `window._ri`
 4. 每条路线截图后 `page.wait_for_timeout(2500)` 等待地图瓦片加载
-5. 全部路线截图完成后 `browser.close()`
+5. 全部截图完成后,用 Pillow 批量生成 800px 宽 JPG Q85 缩略图
+6. 原图和缩略图分别存入 `map-screenshots/` 和 `map-thumbs/`
+7. 最后 `browser.close()`
 
 **全自动串联**:
 
