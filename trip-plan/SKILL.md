@@ -268,17 +268,53 @@ policy=1=高速优先,2=时间优先,3=距离优先,4=避免拥堵
 
 截图路线概要面板,提取距离/时长/通行费。
 
+**地图路线截图（含路线全览 + 距离/时长/通行费浮窗）**:
+
+在获得每段路线的 `{km, min, toll}` 数据后，可以选择在导航页面显示高德地图路线截图，让用户直观看到地图上的导航路线和费用信息。
+
+**截图生成流程**:
+
+1. Playwright 打开 `ditu.amap.com` 建立 session
+2. 等待 AMap JS API 加载完成
+3. 注入 JS 脚本:
+   - 创建 `AMap.Map` 实例
+   - 调用 `AMap.Driving({policy: LEAST_TIME}).search()` 计算驾车路线
+   - 在地图上画路线折线 `AMap.Polyline`（橙色 #FF6F00, 线宽 6）
+   - 添加起点/终点标记 `AMap.Marker`（含名称标签）
+   - 调用 `map.setFitView()` 自适应缩放
+   - 创建底部浮窗信息条（白色背景,毛玻璃阴影）: 导航距离 / 预计时长 / 通行费
+4. 截图前必须清除全部弹窗/遮罩:
+   - 新版上线提示 `.new-version-panel`
+   - 下载APP提示 `.app-download-panel`
+   - 全屏遮罩 `.mask--jss`
+   - 登录弹窗 `.root--jss` / `.lbs-passport-modal`
+5. 截取整个视口的 `map-screenshots/{key}.png`（2560×1600 @2x）
+
+**导航页展示要求**:
+
+| 要求 | 实现 |
+|---|---|
+| 截图宽度适配卡片 | `.poi-route-map { width: 100%; border-radius: 10px; }` |
+| 点击查看原图 | Lightbox 全屏遮罩 + 最大 95vw×95vh 原图显示 + 再次点击关闭 |
+| 无截图时回退 | `.poi-route-info` 文字信息条: 🛣️ 213km ⏱️ 2h39min 💰 ¥84 |
+| 截图失败时的兜底 | 纯文本路线信息,不影响导航按钮功能 |
+
+**批量生成脚本参考（五台山实战验证）**:
+
+Playwright 脚本要点:
+1. 单次打开 `ditu.amap.com`,重用同一个 page 和 map 实例
+2. 每条路线用 `page.evaluate(JS, [fromLng, fromLat, fromName, toLng, toLat, toName])` 切换
+3. 每次截图前清除旧路线图层 `window._rl` 和信息条 `window._ri`
+4. 每条路线截图后 `page.wait_for_timeout(2500)` 等待地图瓦片加载
+5. 全部路线截图完成后 `browser.close()`
+
 **全自动串联**:
 
-1. **批量获取**：`screenshot_html.py` 提供两种模式:
-   - `--mode batch-gaode-routes`：批量获取全部路线数据（首选,用 JS API）
-   - `--mode batch-gaode-screenshots`：批量截图路线页面（兜底）
-
-2. **数据注入**：将返回的 `{km, min, toll}` 数据写入 pois.json 的每 POI 的 `route_km` / `route_min` / `route_toll` 字段
-
-3. **渲染**：`gen_trip_nav.py` 优先使用已存在的 `route_*` 数据（来自 API）,无则回退 Haversine 估算
-
-4. **gen_trip_artifacts.py** 自动检测并加载路线数据文件
+1. **批量获取路线数据**：`screenshot_html.py --mode batch-gaode-routes`（AMap.Driving JS API,高速优先）
+2. **批量生成地图截图**：独立 Playwright 脚本（参考上方流程）,输出 `map-screenshots/{key}.png` + `index.json`
+3. **数据注入**：将 `map_screenshot` 路径和 `route_km/min/toll` 写入每个 POI
+4. **渲染**：`gen_trip_nav.py` 按优先级展示: 地图截图 → 信息卡片截图 → 文字信息条 → 无数据
+5. **部署**: 复制 `map-screenshots/` 目录到博客,与 `trip-nav.html` 同目录
 
 **部署流程**:
 
@@ -341,18 +377,26 @@ python3 scripts/validate.py pois.json --strict
 # Step 4: LLM 自己写内容
 # (无脚本调用,LLM 直接产出文案)
 
-# Step 5: 导航距离与路线截图(可选)
-python3 scripts/screenshot_html.py pois.json --mode batch-gaode-routes -o ./output/screenshots/
-# 此步生成每段路线截图,存于 screenshots/ 目录
-# 截图显示:导航距离(km)+预计时长+通行费(元)
+# Step 5a: 获取导航路线数据(AMap.Driving API)
+python3 scripts/screenshot_html.py pois.json --mode batch-gaode-routes -o ./output/route-data.json
+# 返回: {key: {km, min, toll}}
 
-# Step 5: 渲染 + 部署(自动嵌入路线截图)
+# Step 5b: 批量生成高德地图路线截图(可选)
+# 用专用 Playwright 脚本(参考 SKILL.md 地图路线截图章节):
+# 1. 打开 ditu.amap.com 建立 session
+# 2. 注入 JS 调 AMap.Driving 在地图画路线+浮窗
+# 3. 清除所有弹窗后截图 map-screenshots/{key}.png
+# 4. 将 path 写入 POI 的 map_screenshot 字段
+
+# Step 5c: 渲染导航页(自动嵌入地图截图/文字信息条)
 python3 scripts/gen_trip_nav.py pois.json -o output/trip-nav.html
-python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG  # 自动读取 route-screenshots.json
+
+# Step 5d: 渲染全套产物
+python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG
 python3 scripts/validate.py pois.json  # 部署前质量门
 
 # 部署
-cp output/trip-nav.html ~/blog/<slug>-trip-map.html
+cp -r output/trip-nav.html output/map-screenshots ~/blog/
 cd ~/blog && git add . && git commit -m "feat(trip-map): <目的地>" && git push
 ```
 

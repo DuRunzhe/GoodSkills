@@ -121,17 +121,33 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
     # 真实坐标判定:坐标非零 + 非 fallback 来源
     has_coord = (lng != 0.0 or lat != 0.0) and coord_source != 'fallback'
 
-        # 路线信息（导航距离/时长/通行费）
+    # 路线信息（导航距离/时长/通行费 + 可选路线卡片截图）
     route_info_html = ''
     route_distance = poi.get('route_km', 0)
     route_duration = poi.get('route_min', 0)
     route_toll = poi.get('route_toll', 0)
-    if route_distance > 0:
+    route_card = poi.get('route_card_screenshot', '')
+    map_shot = poi.get('map_screenshot', '')
+
+    if map_shot:
+        # 🌟 地图路线全览截图（含路线 + 距离/时长/通行费浮窗）
+        route_info_html = (
+            f'      <img class="poi-route-map" src="{map_shot}" '
+            f'alt="导航路线" loading="lazy">\n'
+        )
+    elif route_card:
+        # 旧格式：路线信息卡片截图
+        route_info_html = (
+            f'      <img class="poi-route-img" src="{route_card}" '
+            f'alt="导航路线" loading="lazy">\n'
+        )
+    elif route_distance > 0:
+        # 无截图时回退文字信息条
         duration_str = f'{route_duration // 60}h{route_duration % 60:02d}min' if route_duration >= 60 else f'{route_duration}min'
-        toll_str = f'通行费 ≈ ¥{route_toll}' if route_toll > 0 else ''
+        toll_str = f'¥{route_toll}' if route_toll > 0 else ''
         route_info_html = (
             f'      <div class="poi-route-info">\n'
-            f'        <span class="ri-dist">🗺️ {route_distance}km</span>\n'
+            f'        <span class="ri-dist">🛣️ {route_distance}km</span>\n'
             f'        <span class="ri-time">⏱️ {duration_str}</span>\n'
         )
         if toll_str:
@@ -376,7 +392,25 @@ header p .route {{ font-weight: 600; }}
 }}
 .poi-actions a:active {{ opacity: 0.7; }}
 
-/* ========== 路线信息(导航距离/时长/通行费) ========== */
+/* ========== 地图路线截图(响应式+lightbox) ========== */
+.poi-route-map {{
+  width: 100%;
+  display: block;
+  border-radius: 10px;
+  margin: 6px 0 10px;
+  border: 1px solid #e8eaec;
+  cursor: pointer;
+}}
+.poi-route-map:active {{ transform: scale(0.97); }}
+
+/* ========== 路线信息卡片截图(旧格式) ========== */
+.poi-route-img {{
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+  margin: 6px 0 10px;
+  border: 1px solid #f0eae2;
+}}
 .poi-route-info {{
   display: flex;
   gap: 8px;
@@ -445,6 +479,24 @@ header p .route {{ font-weight: 600; }}
   cursor: pointer;
   z-index: 50;
 }}
+
+/* ========== Lightbox 全屏预览 ========== */
+.lightbox-overlay {{
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}}
+.lightbox-overlay img {{
+  max-width: 95vw;
+  max-height: 95vh;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}}
 </style>
 </head>
 <body>
@@ -503,6 +555,20 @@ const observer = new IntersectionObserver((entries) => {{
 }}, {{ rootMargin: '-30% 0px -50% 0px' }});
 
 sections.forEach(s => observer.observe(s));
+
+// Lightbox: 点击地图路线截图全屏查看
+const routeImgs = document.querySelectorAll('.poi-route-map');
+routeImgs.forEach(img => {{
+  img.addEventListener('click', () => {{
+    const lb = document.createElement('div');
+    lb.className = 'lightbox-overlay';
+    const lbImg = document.createElement('img');
+    lbImg.src = img.src;
+    lb.appendChild(lbImg);
+    lb.onclick = () => lb.remove();
+    document.body.appendChild(lb);
+  }});
+}});
 </script>
 
 </body>
