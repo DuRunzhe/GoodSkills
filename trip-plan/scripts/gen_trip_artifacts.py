@@ -198,6 +198,28 @@ def main():
             print('⚠ 校验发现问题,继续生成(可用 --no-validate 跳过):')
             result.report()
 
+    # 尝试加载路线数据（由 batch-gaode-routes 产出，含 km/min/toll）
+    # 优先查找 screenshots/route-screenshots.json，同时兼容 gaode-route-data.json
+    for route_file in [
+        out_dir / 'screenshots' / 'route-screenshots.json',
+        out_dir / 'gaode-route-data.json',
+    ]:
+        if route_file.exists():
+            with open(route_file, 'r', encoding='utf-8') as f:
+                route_data = json.load(f)
+            # 将路线数据注入 POI 的 route_km / route_min / route_toll
+            api_count = 0
+            for poi in data.get('pois', []):
+                key = f"{poi['day']}_{poi.get('idx', 0)}"
+                if key in route_data and route_data[key].get('km'):
+                    r = route_data[key]
+                    poi['route_km'] = r['km']
+                    poi['route_min'] = r['min']
+                    poi['route_toll'] = r['toll']
+                    api_count += 1
+            print(f'  loaded {len(route_data)} routes ({api_count} with API data)')
+            break
+
     print(f'\n生成产物到 {out_dir}/:')
     _gen_trip_nav(data, out_dir / 'trip-nav.html', amap_src=args.src)
     gen_overview_map(data, out_dir / 'trip-overview-map.html',

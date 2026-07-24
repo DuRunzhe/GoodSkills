@@ -231,6 +231,55 @@ description: 旅行攻略智能生成 skill。基于 SKILL.md + destinations/<sl
 - `validate.py pois.json` · 部署前质量门
 - `screenshot_html.py <html>`(可选) · 截图
 
+**🌟 导航距离与过路费测算(高速优先)**:
+
+在生成最终产物前,用两种方式获取每段路线导航距离/时长/通行费:
+
+**首选方式(推荐)**: AMap.Driving JS API（高德驾车规划 API）
+
+用 Playwright 打开高德地图首页建立 session,在页面内注入 JS 调用高德内置的 AMap.Driving API 获取真实路线数据:
+
+```javascript
+const driving = new AMap.Driving({policy: AMap.DrivingPolicy.LEAST_TIME});
+driving.search(
+    new AMap.LngLat(fromLng, fromLat),
+    new AMap.LngLat(toLng, toLat),
+    (status, result) => {
+        if (status === 'complete') {
+            const route = result.routes[0];
+            // route.distance(米), route.time(秒), route.tolls(元)
+        }
+    }
+);
+```
+
+API 返回真实的高速优先导航数据:导航距离(km)、预计时长(min)、通行费(元)。
+
+**兜底方式**: 高德驾车页面截图
+
+如果 JS API 方式失败,用 Playwright 截图高德驾车路线网页:
+```
+https://ditu.amap.com/dir?
+  from[lng]={出发经度}&from[lat]={出发纬度}&from[name]={出发名称}&
+  to[lng]={目的经度}&to[lat]={目的纬度}&to[name]={目的名称}&
+  type=car&policy=1
+```
+policy=1=高速优先,2=时间优先,3=距离优先,4=避免拥堵
+
+截图路线概要面板,提取距离/时长/通行费。
+
+**全自动串联**:
+
+1. **批量获取**：`screenshot_html.py` 提供两种模式:
+   - `--mode batch-gaode-routes`：批量获取全部路线数据（首选,用 JS API）
+   - `--mode batch-gaode-screenshots`：批量截图路线页面（兜底）
+
+2. **数据注入**：将返回的 `{km, min, toll}` 数据写入 pois.json 的每 POI 的 `route_km` / `route_min` / `route_toll` 字段
+
+3. **渲染**：`gen_trip_nav.py` 优先使用已存在的 `route_*` 数据（来自 API）,无则回退 Haversine 估算
+
+4. **gen_trip_artifacts.py** 自动检测并加载路线数据文件
+
 **部署流程**:
 
 ```bash
@@ -261,7 +310,10 @@ git push origin main
 | `validate.py` | `python3 scripts/validate.py pois.json --strict` | Step 3 / Step 5 校验 |
 | `gen_trip_nav.py` | `python3 scripts/gen_trip_nav.py pois.json -o nav.html` | Step 5 渲染导航页 |
 | `gen_trip_artifacts.py` | `python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG [--no-osrm] [--no-validate]` | Step 5 渲染综合地图+KML |
-| `screenshot_html.py` | `python3 scripts/screenshot_html.py <html> [--batch] [--days D1,D2,...] [-o PNG] [--mode route\|straight] [--width N] [--height N] [--scale N] [--wait N]` | Step 5 截图 |
+| `screenshot_html.py` | `python3 scripts/screenshot_html.py <html> [--batch] [--days D1,D2,...] [-o PNG] [--mode route\|straight] [--width N] [--height N] [--scale N] [--wait N]` | Step 5 普通 HTML 截图 |
+| `screenshot_html.py`(gaode-route) | `python3 scripts/screenshot_html.py --mode gaode-route --from-lng N --from-lat N --from-name A --to-lng N --to-lat N --to-name B` | Step 5 🌟🌟【首选】单段高德驾车数据(AMap.Driving JS API,高速优先) |
+| `screenshot_html.py`(gaode-screenshot) | `python3 scripts/screenshot_html.py --mode gaode-screenshot --from-lng N --from-lat N --from-name A --to-lng N --to-lat N --to-name B -o route.png` | Step 5 🛡️【兜底】单段高德驾车截图(API不可用时) |
+| `screenshot_html.py`(batch-gaode-routes) | `python3 scripts/screenshot_html.py pois.json --mode batch-gaode-routes -o ./output/gaode-route-data.json` | Step 5 🌟🌟🌟【批量推荐】批量获取全部POI段路线数据(API首选+截图兜底) |
 
 ## Playbook 使用
 
@@ -289,9 +341,14 @@ python3 scripts/validate.py pois.json --strict
 # Step 4: LLM 自己写内容
 # (无脚本调用,LLM 直接产出文案)
 
-# Step 5: 渲染 + 部署
+# Step 5: 导航距离与路线截图(可选)
+python3 scripts/screenshot_html.py pois.json --mode batch-gaode-routes -o ./output/screenshots/
+# 此步生成每段路线截图,存于 screenshots/ 目录
+# 截图显示:导航距离(km)+预计时长+通行费(元)
+
+# Step 5: 渲染 + 部署(自动嵌入路线截图)
 python3 scripts/gen_trip_nav.py pois.json -o output/trip-nav.html
-python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG
+python3 scripts/gen_trip_artifacts.py pois.json -o ./output --src TAG  # 自动读取 route-screenshots.json
 python3 scripts/validate.py pois.json  # 部署前质量门
 
 # 部署
