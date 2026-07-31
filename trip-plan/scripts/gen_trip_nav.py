@@ -128,12 +128,14 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
     route_toll = poi.get('route_toll', 0)
     route_card = poi.get('route_card_screenshot', '')
     map_shot = poi.get('map_screenshot', '')
+    map_shot_thumb = poi.get('map_screenshot_thumb', '')
 
     if map_shot:
-        # 🌟 地图路线全览截图（含路线 + 距离/时长/通行费浮窗）
+        img_src = map_shot_thumb or map_shot
+        # 🌟 地图路线全览截图（卡片显示缩略图，点击 lightbox 加载原图）
         route_info_html = (
-            f'      <img class="poi-route-map" src="{map_shot}" '
-            f'alt="导航路线" loading="lazy">\n'
+            f'      <img class="poi-route-map" src="{img_src}" '
+            f'data-full="{map_shot}" alt="导航路线" loading="lazy">\n'
         )
     elif route_card:
         # 旧格式：路线信息卡片截图
@@ -563,7 +565,7 @@ routeImgs.forEach(img => {{
     const lb = document.createElement('div');
     lb.className = 'lightbox-overlay';
     const lbImg = document.createElement('img');
-    lbImg.src = img.src;
+    lbImg.src = img.dataset.full || img.src;
     lb.appendChild(lbImg);
     lb.onclick = () => lb.remove();
     document.body.appendChild(lb);
