@@ -11,6 +11,15 @@
       "maturity": "stable",
       "last_verified": "2026-07-23",
       "tags": ["古建筑", "佛教", "梁思成朝圣", "自驾"]
+    },
+    "inner-mongolia": {
+      "name": "内蒙草原环线",
+      "region": "内蒙古自治区(赤峰 / 锡林郭勒)",
+      "type": "草原自驾 + 自然风光",
+      "playbook": "destinations/inner-mongolia.md",
+      "maturity": "draft",
+      "last_verified": "2026-08-01",
+      "tags": ["草原", "自驾", "达达线", "热阿线", "99号公路", "乌兰布统"]
     }
   }
 }
