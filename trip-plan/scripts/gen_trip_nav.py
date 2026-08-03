@@ -208,29 +208,12 @@ def gen_day_section(day_key: str, day_pois: list, data: dict, amap_src: str) -> 
     day_title = day_summary.get('title', day_key)
     day_desc = day_summary.get('desc', '')
 
-    # 按 tag 分组
-    groups = defaultdict(list)
-    for p in day_pois:
-        groups[p.get('tag', 'attract')].append(p)
-
-    # 按 TAG_GROUP_ORDER 顺序生成 group
-    group_html_parts = []
-    for tag in TAG_GROUP_ORDER:
-        if tag not in groups:
-            continue
-        tag_pois = groups[tag]
-        group_name = TAG_GROUP_NAMES.get(tag, tag)
-        emoji = TAG_EMOJI.get(tag, '📍')
-
-        # group title(数量提示)
-        count_hint = f'（{len(tag_pois)} 个）' if len(tag_pois) > 1 and tag == 'attract' else ''
-
-        group_html_parts.append(
-            f'  <div class="group">\n'
-            f'    <div class="group-title"><span class="emoji">{emoji}</span>{group_name}{count_hint}</div>\n'
-            + ''.join(gen_poi_card(p, amap_src) for p in tag_pois) +
-            f'  </div>\n'
-        )
+    # 按 idx 行程顺序平铺渲染（不按 tag 分组）
+    # 历史教训: 按 tag 分组会用 TAG_GROUP_ORDER 固定顺序把行程打乱,
+    # 如 D5 京礼高速(service)排最前、草原天路东线(attract)提前到午餐前。
+    # tag 徽标已由 gen_poi_card 渲染在卡片上,无需分组标题。
+    day_pois = sorted(day_pois, key=lambda p: p.get('idx', 0))
+    poi_cards_html = ''.join(gen_poi_card(p, amap_src) for p in day_pois)
 
     return (
         f'<section class="day" id="day{day_num}">\n'
@@ -242,7 +225,9 @@ def gen_day_section(day_key: str, day_pois: list, data: dict, amap_src: str) -> 
         f'    </div>\n'
         f'    <span class="route-arrow">→</span>\n'
         f'  </div>\n'
-        + ''.join(group_html_parts) +
+        f'  <div class="group">\n'
+        + poi_cards_html +
+        f'  </div>\n'
         f'</section>\n'
     )
 
