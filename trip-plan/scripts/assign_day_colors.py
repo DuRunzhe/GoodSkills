@@ -44,19 +44,20 @@ FIXED_5DAYS = {
 }
 
 
-def assign_day_colors(day_count):
+def assign_day_colors(day_count, start_index=1):
     """返回 {D1: color, D2: color, ...} 字典
     day_count: 行程天数
+    start_index: 起始 Day 序号(默认 1;支持 D0 夜行日等场景传 0)
     """
     result = {}
-    # 1-5 天用固定方案
-    for i in range(1, min(day_count, 5) + 1):
-        result['D' + str(i)] = FIXED_5DAYS['D' + str(i)]
-    # 6+ 天用调色板顺延
-    palette_idx = 0
-    for i in range(6, day_count + 1):
-        result['D' + str(i)] = PALETTE[palette_idx % len(PALETTE)]
-        palette_idx += 1
+    # 1-5 天用固定方案(按相对位置取色)
+    for i in range(day_count):
+        day_key = 'D' + str(start_index + i)
+        if i < 5:
+            result[day_key] = FIXED_5DAYS['D' + str(i + 1)]
+        else:
+            # 6+ 天用调色板顺延
+            result[day_key] = PALETTE[(i - 5) % len(PALETTE)]
     return result
 
 

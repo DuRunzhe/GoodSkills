@@ -31,13 +31,22 @@ from gen_trip_nav import gen_trip_nav as _gen_trip_nav
 
 # 同目录 assets/ 的模板
 TEMPLATE_DIR = SCRIPT_DIR.parent / 'assets'
+def _day_start_index(days):
+    """从 day 列表推断起始序号(如含 D0 夜行日则返回 0,否则 1)"""
+    nums = []
+    for d in days:
+        m = re.match(r'D(\d+)', str(d))
+        if m:
+            nums.append(int(m.group(1)))
+    return min(nums) if nums else 1
+
 
 
 # ============== 2. OSRM 综合地图 ==============
 def gen_overview_map(data, output_path, amap_src='yourtag', use_osrm=True):
     pois = data['pois']
     days = sorted(set(p['day'] for p in pois))
-    day_colors = assign_day_colors(len(days))
+    day_colors = assign_day_colors(len(days), start_index=_day_start_index(days))
 
     # 拉 OSRM 路径
     if use_osrm:
@@ -87,7 +96,7 @@ def gen_overview_map(data, output_path, amap_src='yourtag', use_osrm=True):
 def gen_kml(data, output_path, amap_src='yourtag'):
     pois = sorted(data['pois'], key=lambda p: (p['day'], p.get('idx', 0)))
     days = sorted(set(p['day'] for p in pois))
-    day_colors = assign_day_colors(len(days))
+    day_colors = assign_day_colors(len(days), start_index=_day_start_index(days))
 
     tag_color_kml = {
         'start': 'ff00C853', 'end': 'ffD50000',
