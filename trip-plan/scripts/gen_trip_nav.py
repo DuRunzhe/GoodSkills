@@ -12,6 +12,7 @@ trip-plan 导航点位页生成器(完整实现)
 import json
 import math
 import urllib.parse
+import html
 from pathlib import Path
 from collections import defaultdict
 
@@ -158,13 +159,22 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
 
     # 按钮 HTML
     # 搜索词:城市名 + POI 名（高德 city 参数不生效,城市名拼进 keyword 才能限定）
+    # 若名称已含城市名前缀(如「围场县城午餐」「太仆寺旗」)则不重复拼接
     city_name = poi.get('city_name', '')
-    search_kw = (city_name + name) if city_name else name
+    if city_name and name.startswith(city_name):
+        search_kw = name
+    else:
+        search_kw = (city_name + name) if city_name else name
     search_kw_enc = urllib.parse.quote(search_kw, safe='')
     city_adcode = poi.get('city_adcode', 0)
     city_param = f'&city={city_adcode}' if city_adcode else ''
 
     actions = []
+    # 复制按钮:复制 城市名+地点名（如「围场七星湖」）
+    copy_text = html.escape(search_kw, quote=True)
+    actions.append(
+        f'    <button type="button" class="btn-copy" data-copy="{copy_text}">📋 复制</button>\n'
+    )
     if has_coord:
         # 有坐标:3 按钮（name 统一用 城市名+POI名，坐标定位 + 标签清晰）
         actions.append(
@@ -428,6 +438,7 @@ header p .route {{ font-weight: 600; }}
 .btn-nav    {{ background: #FF6F00; color: white; }}
 .btn-marker {{ background: #f0f1f3; color: #555; }}
 .btn-search {{ background: #e8eaec; color: #555; }}
+.btn-copy   {{ background: #e3f2fd; color: #1976D2; border: none; cursor: pointer; }}
 
 .usage {{
   background: white;
@@ -561,6 +572,38 @@ routeImgs.forEach(img => {{
     lb.appendChild(lbImg);
     lb.onclick = () => lb.remove();
     document.body.appendChild(lb);
+  }});
+}});
+
+// 复制按钮:点击复制 城市名+地点名
+const copyBtns = document.querySelectorAll('.btn-copy');
+copyBtns.forEach(btn => {{
+  btn.addEventListener('click', () => {{
+    const text = btn.dataset.copy || '';
+    const done = () => {{
+      const old = btn.textContent;
+      btn.textContent = '✅ 已复制';
+      btn.style.background = '#c8e6c9';
+      setTimeout(() => {{
+        btn.textContent = old;
+        btn.style.background = '';
+      }}, 1200);
+    }};
+    const fallback = () => {{
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {{ document.execCommand('copy'); done(); }} catch(e) {{}}
+      document.body.removeChild(ta);
+    }};
+    if (navigator.clipboard && navigator.clipboard.writeText) {{
+      navigator.clipboard.writeText(text).then(done).catch(fallback);
+    }} else {{
+      fallback();
+    }}
   }});
 }});
 </script>
