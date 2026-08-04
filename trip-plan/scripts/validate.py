@@ -89,6 +89,12 @@ def validate_pois(pois, strict=False):
         if p.get('coord_source') not in VALID_COORD_SOURCES:
             result.add_error('{0}: coord_source 不合法 ({1})'.format(prefix, p.get('coord_source')))
 
+        # city_adcode 可选:存在时必须是 6 位数字
+        ca = p.get('city_adcode')
+        if ca is not None:
+            if not (isinstance(ca, int) and 100000 <= ca <= 999999):
+                result.add_warning('{0}: city_adcode 应为 6 位城市码 ({1})'.format(prefix, ca))
+
         # 坐标范围(中国境内)
         for cfield in ['lng_gcj02', 'lat_gcj02', 'lng_wgs84', 'lat_wgs84']:
             v = p.get(cfield)

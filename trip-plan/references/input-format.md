@@ -191,6 +191,7 @@ D1,3,景点 A,attract,12:30 抵达 · 游玩 2h,116.500000,40.500000,known
 | `pois[].lng_wgs84` | ✓ | OSM 瓦片 / OSRM 用 |
 | `pois[].lat_wgs84` | ✓ | 同上 |
 | `pois[].coord_source` | ✓ | 决定渲染时透明度(original=实色,fallback=半透明) |
+| `pois[].city_adcode` | △ | **推荐**。高德城市码(6 位,如北京 110000 / 承德 130800 / 赤峰 150400)。搜索链接 `uri.amap.com/search?keyword=..&city=..` 用它限定城市,否则高德按手机当前位置搜同名点(如「七星湖」北京也有) |
 | `special_routes_wgs84` | △ | 仅 99号公路 / 达达线等需要 |
 
 ---

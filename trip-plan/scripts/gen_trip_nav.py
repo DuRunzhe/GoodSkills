@@ -157,6 +157,10 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
         route_info_html += f'      </div>\n'
 
     # 按钮 HTML
+    # 城市 adcode（搜索限定城市，避免高德按当前位置搜同名点）
+    city_adcode = poi.get('city_adcode', 0)
+    city_param = f'&city={city_adcode}' if city_adcode else ''
+
     actions = []
     if has_coord:
         # 有坐标:3 按钮
@@ -170,7 +174,7 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
         )
         actions.append(
             f'    <a class="btn-search" target="_blank" '
-            f'href="https://uri.amap.com/search?keyword={name_enc}&src={amap_src}">🔍 搜索</a>\n'
+            f'href="https://uri.amap.com/search?keyword={name_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
         )
     else:
         # 无坐标:2 按钮(0,0 替代 + 搜索)
@@ -180,7 +184,7 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
         )
         actions.append(
             f'    <a class="btn-search" target="_blank" '
-            f'href="https://uri.amap.com/search?keyword={name_enc}&src={amap_src}">🔍 搜索</a>\n'
+            f'href="https://uri.amap.com/search?keyword={name_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
         )
 
     # 半透明标记(fallback 坐标提示)
