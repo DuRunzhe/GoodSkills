@@ -157,34 +157,37 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
         route_info_html += f'      </div>\n'
 
     # 按钮 HTML
-    # 城市 adcode（搜索限定城市，避免高德按当前位置搜同名点）
+    # 搜索词:城市名 + POI 名（高德 city 参数不生效,城市名拼进 keyword 才能限定）
+    city_name = poi.get('city_name', '')
+    search_kw = (city_name + name) if city_name else name
+    search_kw_enc = urllib.parse.quote(search_kw, safe='')
     city_adcode = poi.get('city_adcode', 0)
     city_param = f'&city={city_adcode}' if city_adcode else ''
 
     actions = []
     if has_coord:
-        # 有坐标:3 按钮
+        # 有坐标:3 按钮（name 统一用 城市名+POI名，坐标定位 + 标签清晰）
         actions.append(
             f'    <a class="btn-nav" target="_blank" '
-            f'href="https://uri.amap.com/navigation?to={lng},{lat},{name_enc}&mode=car&src={amap_src}">🚗 导航</a>\n'
+            f'href="https://uri.amap.com/navigation?to={lng},{lat},{search_kw_enc}&mode=car&src={amap_src}">🚗 导航</a>\n'
         )
         actions.append(
             f'    <a class="btn-marker" target="_blank" '
-            f'href="https://uri.amap.com/marker?markers={lng},{lat},{name_enc}&src={amap_src}">📍 标记位置</a>\n'
+            f'href="https://uri.amap.com/marker?markers={lng},{lat},{search_kw_enc}&src={amap_src}">📍 标记位置</a>\n'
         )
         actions.append(
             f'    <a class="btn-search" target="_blank" '
-            f'href="https://uri.amap.com/search?keyword={name_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
+            f'href="https://uri.amap.com/search?keyword={search_kw_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
         )
     else:
-        # 无坐标:2 按钮(0,0 替代 + 搜索)
+        # 无坐标:2 按钮(0,0 替代 + 搜索, name 带城市名让自动纠错搜对城市)
         actions.append(
             f'    <a class="btn-nav" target="_blank" '
-            f'href="https://uri.amap.com/navigation?to=0,0,{name_enc}&mode=car&src={amap_src}">🚗 导航</a>\n'
+            f'href="https://uri.amap.com/navigation?to=0,0,{search_kw_enc}&mode=car&src={amap_src}">🚗 导航</a>\n'
         )
         actions.append(
             f'    <a class="btn-search" target="_blank" '
-            f'href="https://uri.amap.com/search?keyword={name_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
+            f'href="https://uri.amap.com/search?keyword={search_kw_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
         )
 
     # 半透明标记(fallback 坐标提示)
