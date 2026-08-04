@@ -170,16 +170,16 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
     city_param = f'&city={city_adcode}' if city_adcode else ''
 
     actions = []
-    # 复制按钮:复制 城市名+地点名（如「围场七星湖」）
-    copy_text = html.escape(search_kw, quote=True)
-    actions.append(
-        f'    <button type="button" class="btn-copy" data-copy="{copy_text}">📋 复制</button>\n'
-    )
     if has_coord:
-        # 有坐标:3 按钮（name 统一用 城市名+POI名，坐标定位 + 标签清晰）
+        # 有坐标:4 按钮（导航+复制同排, 标记+搜索同排）
         actions.append(
             f'    <a class="btn-nav" target="_blank" '
             f'href="https://uri.amap.com/navigation?to={lng},{lat},{search_kw_enc}&mode=car&src={amap_src}">🚗 导航</a>\n'
+        )
+        # 复制按钮:复制 城市名+地点名（如「围场七星湖」）,紧跟导航同排
+        copy_text = html.escape(search_kw, quote=True)
+        actions.append(
+            f'    <button type="button" class="btn-copy" data-copy="{copy_text}">📋 复制</button>\n'
         )
         actions.append(
             f'    <a class="btn-marker" target="_blank" '
@@ -190,10 +190,14 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
             f'href="https://uri.amap.com/search?keyword={search_kw_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
         )
     else:
-        # 无坐标:2 按钮(0,0 替代 + 搜索, name 带城市名让自动纠错搜对城市)
+        # 无坐标:3 按钮(0,0 替代 + 搜索 + 复制, name 带城市名让自动纠错搜对城市)
         actions.append(
             f'    <a class="btn-nav" target="_blank" '
             f'href="https://uri.amap.com/navigation?to=0,0,{search_kw_enc}&mode=car&src={amap_src}">🚗 导航</a>\n'
+        )
+        copy_text = html.escape(search_kw, quote=True)
+        actions.append(
+            f'    <button type="button" class="btn-copy" data-copy="{copy_text}">📋 复制</button>\n'
         )
         actions.append(
             f'    <a class="btn-search" target="_blank" '
@@ -381,7 +385,7 @@ header p .route {{ font-weight: 600; }}
   gap: 6px;
   flex-wrap: wrap;
 }}
-.poi-actions a {{
+.poi-actions a, .poi-actions button {{
   flex: 1 1 calc(50% - 3px);
   min-width: 88px;
   display: block;
@@ -438,7 +442,7 @@ header p .route {{ font-weight: 600; }}
 .btn-nav    {{ background: #FF6F00; color: white; }}
 .btn-marker {{ background: #f0f1f3; color: #555; }}
 .btn-search {{ background: #e8eaec; color: #555; }}
-.btn-copy   {{ background: #e3f2fd; color: #1976D2; border: none; cursor: pointer; }}
+.btn-copy   {{ background: #FF6F00; color: white; border: none; cursor: pointer; }}
 
 .usage {{
   background: white;

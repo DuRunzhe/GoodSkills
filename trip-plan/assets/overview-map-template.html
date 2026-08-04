@@ -153,7 +153,7 @@ function render() {
       const srcClass = p.coord_source ? p.coord_source.split(':')[0] : 'unknown';
       // 复制文本:城市名 + 地点名(名称已含城市前缀则不重复)
       var copyText = (p.city_name && p.name.indexOf(p.city_name) !== 0) ? (p.city_name + p.name) : p.name;
-      var copyHtml = '<a href="javascript:void(0)" onclick="copyPoiText(this,\'' + copyText.replace(/'/g, "\\'") + '\')" style="color:#1976D2;margin-left:8px">📋 复制</a>';
+      var copyHtml = '<a href="javascript:void(0)" onclick="copyPoiText(this,\'' + copyText.replace(/'/g, "\\'") + '\')" style="color:#FF6F00;margin-left:8px">📋 复制</a>';
       const popupHtml =
         '<b>' + p.idx + '. ' + p.name + '</b><br>' +
         '<span style="color:' + color + '">●</span> ' + tagLabels[p.tag] + ' · ' + p.day + '<br>' +
