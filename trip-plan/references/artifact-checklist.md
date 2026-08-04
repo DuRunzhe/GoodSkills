@@ -44,7 +44,8 @@
 | Day × N section | `id="day1"` / `id="day2"` / ... |
 | day-title | Day 编号 + 日期 + 长标题 + 里程/时长/主题 |
 | group 分类 | 按时段(上午/下午/晚上)或按类别(景点/餐厅/酒店) |
-| poi 卡片 | name + tag 徽章 + info + action 按钮 |
+| poi 卡片 | name + tag 徽章 + info + ticket 行(可选) + action 按钮 |
+| ticket 行 | 🎫 门票 / 🕐 开放时间 / 🆓 免票政策（`ticket_price` / `ticket_open` / `ticket_free` 任一存在时显示，橙色左边框卡片） |
 | 有坐标 POI 4 按钮 | 🚗 导航 / 📍 标记位置 / 🔍 搜索 / **📋 复制**(城市名+地点名) |
 | 无坐标 POI 3 按钮 | 🚗 导航(0,0)+ 🔍 搜索(带 city) + **📋 复制** |
 | usage 区块 | 使用说明 + tip |

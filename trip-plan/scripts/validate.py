@@ -95,6 +95,16 @@ def validate_pois(pois, strict=False):
             if not (isinstance(ca, int) and 100000 <= ca <= 999999):
                 result.add_warning('{0}: city_adcode 应为 6 位城市码 ({1})'.format(prefix, ca))
 
+        # ticket 字段可选:存在时必须是字符串
+        for tfield in ['ticket_price', 'ticket_open', 'ticket_free']:
+            tv = p.get(tfield)
+            if tv is not None and not isinstance(tv, str):
+                result.add_warning('{0}: {1} 应为字符串 ({2})'.format(prefix, tfield, tv))
+
+        # 门票字段组合提示:景点(tag=attract)建议带门票信息
+        if p.get('tag') == 'attract' and not any(p.get(f) for f in ['ticket_price', 'ticket_open', 'ticket_free']):
+            result.add_warning('{0}: 景点建议补充 ticket_price / ticket_open / ticket_free（门票/开放时间/免票政策）'.format(prefix))
+
         # 坐标范围(中国境内)
         for cfield in ['lng_gcj02', 'lat_gcj02', 'lng_wgs84', 'lat_wgs84']:
             v = p.get(cfield)

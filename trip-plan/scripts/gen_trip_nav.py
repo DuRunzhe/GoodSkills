@@ -160,8 +160,16 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
     # 按钮 HTML
     # 搜索词:城市名 + POI 名（高德 city 参数不生效,城市名拼进 keyword 才能限定）
     # 若名称已含城市名前缀(如「围场县城午餐」「太仆寺旗」)则不重复拼接
+    # 若设置了 search_kw（高德未收录点，如「金莲花湿地」→搜「将军泡子」），优先用它
     city_name = poi.get('city_name', '')
-    if city_name and name.startswith(city_name):
+    search_kw_override = poi.get('search_kw', '')
+    if search_kw_override:
+        # 高德未收录点的替代搜索词：同样拼接城市名前缀（如 克什克腾旗将军泡子）
+        if city_name and not search_kw_override.startswith(city_name):
+            search_kw = city_name + search_kw_override
+        else:
+            search_kw = search_kw_override
+    elif city_name and name.startswith(city_name):
         search_kw = name
     else:
         search_kw = (city_name + name) if city_name else name
@@ -204,6 +212,21 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
             f'href="https://uri.amap.com/search?keyword={search_kw_enc}{city_param}&src={amap_src}">🔍 搜索</a>\n'
         )
 
+    # 门票信息行（可选：ticket_price / ticket_open / ticket_free）
+    ticket_html = ''
+    ticket_parts = []
+    t_price = poi.get('ticket_price', '')
+    t_open = poi.get('ticket_open', '')
+    t_free = poi.get('ticket_free', '')
+    if t_price:
+        ticket_parts.append(f'<span class="tk-price">🎫 {t_price}</span>')
+    if t_open:
+        ticket_parts.append(f'<span class="tk-open">🕐 {t_open}</span>')
+    if t_free:
+        ticket_parts.append(f'<span class="tk-free">🆓 {t_free}</span>')
+    if ticket_parts:
+        ticket_html = f'      <div class="poi-ticket">' + ' '.join(ticket_parts) + '</div>\n'
+
     # 半透明标记(fallback 坐标提示)
     opacity_style = ' style="opacity:0.7;"' if coord_source == 'fallback' else ''
 
@@ -213,7 +236,8 @@ def gen_poi_card(poi: dict, amap_src: str) -> str:
         f'        <span class="tag {tag}">{tag_cn}</span>\n'
         f'      </div>\n'
         f'      <div class="poi-info">{info}</div>\n'
-        + route_info_html +
+        + ticket_html +
+        route_info_html +
         f'      <div class="poi-actions">\n'
         + ''.join(actions) +
         f'      </div>\n'
@@ -379,6 +403,20 @@ header p .route {{ font-weight: 600; }}
   line-height: 1.5;
 }}
 .poi-info .price {{ color: #FF6F00; font-weight: 600; }}
+
+.poi-ticket {{
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  background: #fff8f0;
+  border-left: 3px solid #FF6F00;
+  border-radius: 4px;
+}}
+.poi-ticket span {{ display: block; }}
+.poi-ticket .tk-price {{ color: #c0392b; font-weight: 600; }}
+.poi-ticket .tk-open  {{ color: #555; }}
+.poi-ticket .tk-free  {{ color: #2e7d32; }}
 
 .poi-actions {{
   display: flex;

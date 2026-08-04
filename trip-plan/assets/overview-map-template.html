@@ -154,10 +154,20 @@ function render() {
       // 复制文本:城市名 + 地点名(名称已含城市前缀则不重复)
       var copyText = (p.city_name && p.name.indexOf(p.city_name) !== 0) ? (p.city_name + p.name) : p.name;
       var copyHtml = '<a href="javascript:void(0)" onclick="copyPoiText(this,\'' + copyText.replace(/'/g, "\\'") + '\')" style="color:#FF6F00;margin-left:8px">📋 复制</a>';
+      // 门票信息行（可选）
+      var ticketHtml = '';
+      if (p.ticket_price || p.ticket_open || p.ticket_free) {
+        ticketHtml = '<div style="background:#fff8f0;border-left:3px solid #FF6F00;padding:4px 8px;margin:4px 0;border-radius:4px;font-size:12px">';
+        if (p.ticket_price) ticketHtml += '<div><b>🎫</b> ' + p.ticket_price + '</div>';
+        if (p.ticket_open)  ticketHtml += '<div><b>🕐</b> ' + p.ticket_open + '</div>';
+        if (p.ticket_free)  ticketHtml += '<div><b>🆓</b> ' + p.ticket_free + '</div>';
+        ticketHtml += '</div>';
+      }
       const popupHtml =
         '<b>' + p.idx + '. ' + p.name + '</b><br>' +
         '<span style="color:' + color + '">●</span> ' + tagLabels[p.tag] + ' · ' + p.day + '<br>' +
         '<small>' + p.info + '</small><br>' +
+        ticketHtml +
         '<small style="color:#888">📍 GCJ-02: ' + p.lng_gcj02 + ', ' + p.lat_gcj02 + '</small><br>' +
         '<small class="src-' + srcClass + '">来源: ' + (p.coord_source || '未知') + '</small><br>' +
         '<a href="' + amapUrl + '" target="_blank" style="color:#FF6F00">🧭 高德导航</a>' +

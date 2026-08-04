@@ -91,6 +91,18 @@
               "fallback"
             ],
             "description": "坐标获取质量。original=博客自带精确坐标;known=公开资料常用坐标;fallback=city 中心 + 抖动"
+          },
+          "ticket_price": {
+            "type": "string",
+            "description": "门票价格（可选）。例：'120 元/人（通票，3 日有效）' / '免费' / '门票 120 + 观光车 40'"
+          },
+          "ticket_open": {
+            "type": "string",
+            "description": "开放/营业时间（可选）。例：'旺季 7:00-19:00' / '全天开放'"
+          },
+          "ticket_free": {
+            "type": "string",
+            "description": "免票/优惠政策（可选）。例：'1.2m 以下儿童、70 岁以上老人、现役军人免票；学生半价'"
           }
         }
       }
