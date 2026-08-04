@@ -44,9 +44,9 @@
 | Day × N section | `id="day1"` / `id="day2"` / ... |
 | day-title | Day 编号 + 日期 + 长标题 + 里程/时长/主题 |
 | group 分类 | 按时段(上午/下午/晚上)或按类别(景点/餐厅/酒店) |
-| poi 卡片 | name + tag 徽章 + info + 2-3 个 action 按钮 |
-| 有坐标 POI 3 按钮 | 🚗 导航 / 📍 标记位置 / 🔍 搜索 |
-| 无坐标 POI 2 按钮 | 🚗 导航(0,0)+ 🔍 搜索(带 city) |
+| poi 卡片 | name + tag 徽章 + info + action 按钮 |
+| 有坐标 POI 4 按钮 | 🚗 导航 / 📍 标记位置 / 🔍 搜索 / **📋 复制**(城市名+地点名) |
+| 无坐标 POI 3 按钮 | 🚗 导航(0,0)+ 🔍 搜索(带 city) + **📋 复制** |
 | usage 区块 | 使用说明 + tip |
 | to-top 按钮 | fixed 右下角,滚动 200px 后显示 |
 

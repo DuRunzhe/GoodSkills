@@ -148,16 +148,20 @@ function render() {
       });
       const marker = L.marker([p.lat_wgs84, p.lng_wgs84], {icon: icon, title: p.name}).addTo(markerLayer);
 
-      // Popup 含高德导航
+      // Popup 含高德导航 + 复制按钮(城市名+地点名)
       const amapUrl = 'https://uri.amap.com/navigation?to=' + p.lng_gcj02 + ',' + p.lat_gcj02 + ',' + encodeURIComponent(p.name) + '&mode=car&src={src}';
       const srcClass = p.coord_source ? p.coord_source.split(':')[0] : 'unknown';
+      // 复制文本:城市名 + 地点名(名称已含城市前缀则不重复)
+      var copyText = (p.city_name && p.name.indexOf(p.city_name) !== 0) ? (p.city_name + p.name) : p.name;
+      var copyHtml = '<a href="javascript:void(0)" onclick="copyPoiText(this,\'' + copyText.replace(/'/g, "\\'") + '\')" style="color:#1976D2;margin-left:8px">📋 复制</a>';
       const popupHtml =
         '<b>' + p.idx + '. ' + p.name + '</b><br>' +
         '<span style="color:' + color + '">●</span> ' + tagLabels[p.tag] + ' · ' + p.day + '<br>' +
         '<small>' + p.info + '</small><br>' +
         '<small style="color:#888">📍 GCJ-02: ' + p.lng_gcj02 + ', ' + p.lat_gcj02 + '</small><br>' +
         '<small class="src-' + srcClass + '">来源: ' + (p.coord_source || '未知') + '</small><br>' +
-        '<a href="' + amapUrl + '" target="_blank" style="color:#FF6F00">🧭 高德导航</a>';
+        '<a href="' + amapUrl + '" target="_blank" style="color:#FF6F00">🧭 高德导航</a>' +
+        copyHtml;
       marker.bindPopup(popupHtml);
       allBounds.push([p.lat_wgs84, p.lng_wgs84]);
     });
@@ -234,6 +238,30 @@ document.querySelectorAll('#routeToggle button').forEach(function(btn) {
     render();
   });
 });
+
+// 复制按钮:复制 城市名+地点名（综合地图 popup 用）
+function copyPoiText(el, text) {
+  const done = () => {
+    const old = el.textContent;
+    el.textContent = '✅ 已复制';
+    setTimeout(() => { el.textContent = old; }, 1200);
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch(e) {}
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(fallback);
+  } else {
+    fallback();
+  }
+}
 </script>
 </body>
 </html>
