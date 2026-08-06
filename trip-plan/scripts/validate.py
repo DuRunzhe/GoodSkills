@@ -19,7 +19,7 @@ REQUIRED_POI_FIELDS = [
     'lng_gcj02', 'lat_gcj02', 'lng_wgs84', 'lat_wgs84', 'coord_source'
 ]
 
-VALID_TAGS = {'start', 'end', 'attract', 'hotel', 'food', 'service', 'stop'}
+VALID_TAGS = {'start', 'end', 'attract', 'hotel', 'food', 'service', 'stop', 'optional'}
 VALID_COORD_SOURCES = {'original', 'known', 'fallback'}
 
 # 中国境内大致范围
