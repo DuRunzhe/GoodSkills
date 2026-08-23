@@ -103,6 +103,35 @@ description: "摩托车数据博文排版指南：11列车型速览表+lightbox�
 
 > 完整可运行示例见 `examples/moto-blog-format-demo.md`。
 
+### 2.5 表格弹性布局规范（⚠️ 防溢出）
+
+表格列多/内容长时会撑破容器（`.container` 内容区 ~804px），必须启用弹性布局。**纯 CSS 实现，不改 HTML**（不用 table-wrap 包装，见附录 B）。
+
+```css
+/* 桌面端：长内容强制换行，表格不超出容器 */
+table { border-collapse: collapse; width: 100%; max-width: 100%; margin: 12px 0; font-size: 14px; table-layout: auto; }
+th, td { padding: 7px 12px; border: 1px solid #eee; vertical-align: top; overflow-wrap: anywhere; word-break: break-word; }
+
+/* 移动端（≤600px）：宽表格横向滚动，页面本身不溢出 */
+@media (max-width: 600px) {
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+}
+```
+
+| 场景 | 方案 |
+|---|---|
+| 桌面端 | `overflow-wrap: anywhere` + `word-break: break-word` 强制长文本（如「¥15,980(降价 3000 后,部分渠道 6 期免息)」）换行，`table-layout:auto` 自适应列宽 |
+| 移动端 | `display:block` + `overflow-x:auto` + `white-space:nowrap` 让宽表可横向滑动，页面无横向滚动条 |
+
+**验证方法**（headless Chrome 检测溢出）：
+
+```bash
+# 页面注入检测脚本后 dump-dom，检查「容器宽 / 页面横向溢出 / 表格右边缘超出」
+chrome --headless --dump-dom --virtual-time-budget=4000 "http://127.0.0.1:PORT/moto-detect.html" | grep -o '容器宽:[^<]*'
+```
+
+注意：`white-space: nowrap` 只在移动端 media query 内生效，桌面端保持自动换行。
+
 ## 3. 详细参数记录子章节
 
 ### 3.1 车型小节模板
@@ -337,6 +366,7 @@ cd ~/blog && git add ... && git commit -m "..." && git push
 | ❌ 没标 🏆 冠军 | ✅ 「同级之最」必须 🏆 标记 |
 | ❌ 缺「待补全项」 | ✅ 章节末尾必带「待补全项」 |
 | ❌ 内容更新了但版本号没动 | ✅ 每次更新递增副标题版本号（见 §7.2）|
+| ❌ 表格列多内容长撑破容器 | ✅ 用 §2.5 弹性布局：桌面端强制换行 + 移动端横向滚动 |
 
 ---
 
@@ -362,4 +392,4 @@ skill 是规范，**不是数据快照**。当前图库清单是任务级数据�
 
 ---
 
-_本 skill 按 spec vs data 分离原则维护（2026-07-15 清理；2026-08-23 新增 §7.2 版本号规范）。_
+_本 skill 按 spec vs data 分离原则维护（2026-07-15 清理；2026-08-23 新增 §7.2 版本号规范；2026-08-24 新增 §2.5 表格弹性布局规范）。_
